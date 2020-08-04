@@ -4,16 +4,11 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
-using Microsoft.TeamFoundation.Client;
-using Microsoft.TeamFoundation.VersionControl.Client;
-using Microsoft.TeamFoundation.WorkItemTracking.Client;
 using Newtonsoft.Json;
 
 namespace MergeTracker
@@ -47,6 +42,9 @@ namespace MergeTracker
                 case nameof(MergeTarget.BugNumber):
                     GenerateName(sender as MergeTarget);
                     break;
+                case nameof(MergeTarget.IsOriginal):
+                    SetOriginal(sender as MergeTarget);
+                    break;
             }
         }
 
@@ -56,6 +54,14 @@ namespace MergeTracker
                 Name == "New Merge Item" && mergeTarget?.IsOriginal == true && int.TryParse(mergeTarget.BugNumber, out int bugNumber))
             {
                 Name = (await TfsUtils.GetWorkItem(bugNumber))?.Title ?? Name;
+            }
+        }
+
+        private void SetOriginal(MergeTarget changedMergeTarget)
+        {
+            if (changedMergeTarget.IsOriginal)
+            {
+                MergeTargets.Where(t => t != changedMergeTarget && t.IsOriginal).ToList().ForEach(t => t.IsOriginal = false);
             }
         }
 

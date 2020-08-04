@@ -121,7 +121,7 @@
                                     <DataGridTemplateColumn Header="Original" Width="Auto">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <CheckBox IsChecked="{Binding IsOriginal, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+                                                <RadioButton IsChecked="{Binding IsOriginal, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
