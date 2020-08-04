@@ -52,7 +52,7 @@
         </Grid>
 
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,5,0,0">
-            <ItemsControl ItemsSource="{Binding RootConfiguration.MergeItems}" Margin="5">
+            <ItemsControl ItemsSource="{Binding RootConfiguration.MergeItems}" Margin="5" IsTabStop="False">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Grid Visibility="{c:Binding '!IsFiltered', FalseToVisibility=Collapsed}">
@@ -88,7 +88,7 @@
                                     </Style>
 
                                     <Style TargetType="{x:Type DataGridCell}">
-                                        <!--<Setter Property="Foreground" Value="Black" />-->
+                                        <Setter Property="IsTabStop" Value="False"/>
                                         <Style.Triggers>
                                             <Trigger Property="IsSelected" Value="True">
                                                 <Setter Property="Background" Value="{x:Null}" />
