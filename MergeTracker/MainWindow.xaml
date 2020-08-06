@@ -27,6 +27,7 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <Button Grid.Column="0" Command="{Binding Commands.CreateMergeItemCommand}" Content="New Merge Item" Margin="5" Padding="5"/>
@@ -47,7 +48,10 @@
 
             <CheckBox Grid.Column="8" IsChecked="{Binding RootConfiguration.NotCompletedFilter}" Margin="5" Padding="5" VerticalAlignment="Center"/>
 
-            <Button Grid.Column="9" Content="Clear filters" Margin="5" Padding="5" VerticalAlignment="Center"
+            <Button Grid.Column="9" Content="Reapply filters" Margin="5" Padding="5" VerticalAlignment="Center"
+                    Command="{Binding Commands.FilterCommand}"/>
+
+            <Button Grid.Column="10" Content="Clear filters" Margin="5" Padding="5" VerticalAlignment="Center"
                     Command="{Binding Commands.ClearFiltersCommand}"/>
         </Grid>
 
