@@ -1,6 +1,9 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using GalaSoft.MvvmLight;
+using Newtonsoft.Json;
 using SpecialFolder = System.Environment.SpecialFolder;
 
 namespace MergeTracker
@@ -60,18 +63,29 @@ namespace MergeTracker
         }
         private string _tfsPassword;
 
-        public string TfsPath
+        public List<string> WorkItemServers
         {
-            get => _tfsPath;
-            set => Set(nameof(TfsPath), ref _tfsPath, value);
+            get => _workItemServers;
+            set => Set(nameof(WorkItemServers), ref _workItemServers, value);
         }
-        private string _tfsPath;
+        private List<string> _workItemServers;
+
+        [JsonIgnore]
+        public string DefaultWorkItemServer => WorkItemServers?.FirstOrDefault();
+
+        public List<string> SourceControlServers
+        {
+            get => _sourceControlServers;
+            set => Set(nameof(SourceControlServers), ref _sourceControlServers, value);
+        }
+        private List<string> _sourceControlServers;
+
+        [JsonIgnore]
+        public string DefaultSourceControlServer => SourceControlServers?.FirstOrDefault();
 
         public static RootConfiguration Load()
         {
             RootConfiguration result = null;
-
-            bool fileExistedBeforeFirstRead = File.Exists(JsonSerialization.GetCustomConfigFilePath(SpecialFolder.ApplicationData, CONFIG_FILE_NAME, createIfNotExists: false));
 
             try
             {
@@ -88,14 +102,6 @@ namespace MergeTracker
             }
             else
             {
-                if (fileExistedBeforeFirstRead)
-                {
-                    // The file exists, but there was a problem deserializing it.
-                    // Be sure to back up the existing file before overwriting it with an empty instance.
-                    File.Copy(JsonSerialization.GetCustomConfigFilePath(SpecialFolder.ApplicationData, CONFIG_FILE_NAME),
-                              JsonSerialization.GetCustomConfigFilePath(SpecialFolder.ApplicationData, CONFIG_BACKUP_NAME), overwrite: true);
-                }
-
                 Save(new RootConfiguration());
                 return Instance = Load();
             }
@@ -103,6 +109,13 @@ namespace MergeTracker
 
         public static void Save(RootConfiguration rootConfiguration)
         {
+            // Always back up the file
+            if (File.Exists(JsonSerialization.GetCustomConfigFilePath(SpecialFolder.ApplicationData, CONFIG_FILE_NAME, createIfNotExists: false)))
+            {
+                File.Copy(JsonSerialization.GetCustomConfigFilePath(SpecialFolder.ApplicationData, CONFIG_FILE_NAME),
+                          JsonSerialization.GetCustomConfigFilePath(SpecialFolder.ApplicationData, CONFIG_BACKUP_NAME), overwrite: true);
+            }
+
             JsonSerialization.SerializeObjectToCustomConfigFile(CONFIG_FILE_NAME, rootConfiguration, SpecialFolder.ApplicationData);
         }
 

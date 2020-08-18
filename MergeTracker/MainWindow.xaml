@@ -8,7 +8,7 @@
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         mc:Ignorable="d"
         Title="Merge Tracker" Height="800" Width="1500"
-        
+
         Closing="Window_Closing">
     <Grid>
         <Grid.RowDefinitions>
@@ -33,7 +33,7 @@
 
             <Button Grid.Column="0" Command="{Binding Commands.CreateMergeItemCommand}" Content="New Merge Item" Margin="5" Padding="5"/>
 
-            <TextBlock Grid.Column="1" Text="Filter by bug number:" Margin="5" Padding="5"/>
+            <TextBlock Grid.Column="1" Text="Filter by work item number:" Margin="5" Padding="5"/>
 
             <TextBox Grid.Column="2" Text="{Binding RootConfiguration.BugNumberFilter, UpdateSourceTrigger=PropertyChanged, Delay=500}" Margin="5" Padding="5"/>
 
@@ -60,32 +60,57 @@
             <ItemsControl ItemsSource="{Binding RootConfiguration.MergeItems}" Margin="5" IsTabStop="False">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Grid Visibility="{c:Binding '!IsFiltered', FalseToVisibility=Collapsed}">
-                            <Grid.ColumnDefinitions>
+                        <local:MergeItemGrid Visibility="{c:Binding '!IsFiltered', FalseToVisibility=Collapsed}">
+                            <local:MergeItemGrid.ContextMenu>
+                                <ContextMenu x:Name="MergeItemContextMenu">
+                                    <MenuItem Header="Work Item Server" IsCheckable="False" ItemsSource="{Binding WorkItemServers}" IsEnabled="{c:Binding 'WorkItemServer != null'}">
+                                        <MenuItem.ItemContainerStyle>
+                                            <Style TargetType="MenuItem">
+                                                <Setter Property="IsChecked" Value="{Binding IsSelected}"/>
+                                                <Setter Property="Command" Value="{Binding Command}"/>
+                                            </Style>
+                                        </MenuItem.ItemContainerStyle>
+                                    </MenuItem>
+                                    <MenuItem Header="Source Control Server" IsCheckable="False" ItemsSource="{Binding SourceControlServers}" IsEnabled="{c:Binding 'SourceControlServer != null'}">
+                                        <MenuItem.ItemContainerStyle>
+                                            <Style TargetType="MenuItem">
+                                                <Setter Property="IsChecked" Value="{Binding IsSelected}"/>
+                                                <Setter Property="Command" Value="{Binding Command}"/>
+                                            </Style>
+                                        </MenuItem.ItemContainerStyle>
+                                    </MenuItem>
+                                </ContextMenu>
+                            </local:MergeItemGrid.ContextMenu>
+
+                            <local:MergeItemGrid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
+                            </local:MergeItemGrid.ColumnDefinitions>
 
-                            <Grid.RowDefinitions>
+                            <local:MergeItemGrid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition/>
                                 <RowDefinition Height="20"/>
                                 <RowDefinition Height="15"/>
                                 <RowDefinition Height="20"/>
-                            </Grid.RowDefinitions>
+                            </local:MergeItemGrid.RowDefinitions>
 
                             <TextBox Grid.Column="0" Grid.Row="0" Margin="5" Padding="5" Text="{Binding Name}" FontWeight="Medium"
                                      ToolTip="{Binding Name}"/>
 
-                            <Button Grid.Column="2" Grid.Row="0" Margin="5" Padding="5,0,5,0" Content="New Merge Target"
+                            <TextBlock Grid.Column="1" Grid.Row="0" Margin="5" Padding="5" Text="!!" FontSize="15"
+                                       ToolTip="{Binding LastError}" Visibility="{c:Binding HasLastError, FalseToVisibility=Collapsed}"/>
+
+                            <Button Grid.Column="3" Grid.Row="0" Margin="5" Padding="5,0,5,0" Content="New Merge Target"
                                     Command="{Binding Commands.CreateMergeTargetCommand}"/>
 
-                            <Button Grid.Column="3" Grid.Row="0" Margin="5" Padding="5,0,5,0" Content="Delete"
+                            <Button Grid.Column="4" Grid.Row="0" Margin="5" Padding="5,0,5,0" Content="Delete"
                                     Command="{Binding Commands.DeleteCommand}"/>
 
-                            <DataGrid x:Name="DataGrid" Grid.Column="0" Grid.ColumnSpan="4" Grid.Row="1" Margin="5" ItemsSource="{Binding MergeTargets}" AutoGenerateColumns="False"
+                            <DataGrid x:Name="DataGrid" Grid.Column="0" Grid.ColumnSpan="5" Grid.Row="1" Margin="5" ItemsSource="{Binding MergeTargets}" AutoGenerateColumns="False"
                                       GridLinesVisibility="None" HeadersVisibility="Column" BorderThickness="0" CanUserAddRows="False">
                                 <i:Interaction.Behaviors>
                                     <local:IgnoreMouseWheelBehavior/>
@@ -136,7 +161,7 @@
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
 
-                                    <DataGridTemplateColumn Header="Bug Number" Width="*">
+                                    <DataGridTemplateColumn Header="Work Item Number" Width="*">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <Grid>
@@ -151,7 +176,7 @@
                                                     <Button Grid.Column="1" Width="20" Margin="0,5,0,5" HorizontalAlignment="Right" Content="❐"
                                                             Command="{Binding DataContext.Commands.CopyBugNumberCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                             CommandParameter="{Binding ElementName=DataGrid}"
-                                                            ToolTip="Copy bug number to clipboard"/>
+                                                            ToolTip="Copy work item number to clipboard"/>
                                                     <Button Grid.Column="2" Width="20" Margin="0,5,5,5" HorizontalAlignment="Right" Content="◥"
                                                             Command="{Binding DataContext.Commands.OpenBugCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                             CommandParameter="{Binding ElementName=DataGrid}"
@@ -205,7 +230,7 @@
                                                 <Button Content="Generate Check-in Message" Margin="5" Padding="5,0,5,0"
                                                         Command="{Binding DataContext.Commands.GenerateMessageCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                         CommandParameter="{Binding ElementName=DataGrid}"
-                                                        ToolTip="Generates a check-in message containing the original bug and branch info and the target branch.&#x0a;Copies the message to the clipboard."/>
+                                                        ToolTip="Generates a check-in message containing the original work item number and branch info and the target branch.&#x0a;Copies the message to the clipboard."/>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
@@ -220,11 +245,21 @@
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
 
+                                    <DataGridTemplateColumn Header="Menu" Width="Auto">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button Content="▼" Margin="5" Padding="5,0,5,0"
+                                                        Command="{Binding DataContext.Commands.ShowMergeItemContextMenuCommand, RelativeSource={RelativeSource AncestorType=local:MainWindow}}"
+                                                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=local:MergeItemGrid}}"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
                                 </DataGrid.Columns>
                             </DataGrid>
 
-                            <Canvas Grid.Column="0" Grid.ColumnSpan="4" Grid.Row="3" Background="LightGray" Margin="5"/>
-                        </Grid>
+                            <Canvas Grid.Column="0" Grid.ColumnSpan="5" Grid.Row="3" Background="LightGray" Margin="5"/>
+                        </local:MergeItemGrid>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>

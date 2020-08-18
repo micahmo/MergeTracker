@@ -1,73 +1,124 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
-using System.Windows;
-using Microsoft.TeamFoundation.Client;
-using Microsoft.TeamFoundation.WorkItemTracking.Client;
+using Microsoft.TeamFoundation.SourceControl.WebApi;
+using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
+using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
+using Microsoft.VisualStudio.Services.Common;
+using Microsoft.VisualStudio.Services.WebApi;
 
 namespace MergeTracker
 {
     public static class TfsUtils
     {
-        private static Task<bool> Initialize()
+        private static Task<TClient> Initialize<TClient>(string serverName) where TClient : VssHttpClientBase
         {
             return Task.Run(() =>
             {
-                bool result = false;
+                TClient result = null;
+                ServerClientTypePair serverClientTypePair = new ServerClientTypePair {ServerName = serverName, VssHttpClient = typeof(TClient)};
 
-                if (_initializationState == InitializationState.Uninitialized)
+                if (_failedToConnect.Contains(serverName) == false) // Do not try to connect a second time
                 {
-                    try
+                    if (_tfsClients.TryGetValue(serverClientTypePair, out var cachedTfsClient) && cachedTfsClient is TClient client)
                     {
-                        NetworkCredential nc = new NetworkCredential(RootConfiguration.Instance.TfsUsername, RootConfiguration.Instance.TfsPassword);
-                        Uri uri = new Uri(RootConfiguration.Instance.TfsPath);
-
-                        TfsClientCredentials tfsCredential = new TfsClientCredentials(new WindowsCredential(nc), false);
-
-                        TfsTeamProjectCollection tpc = new TfsTeamProjectCollection(uri, tfsCredential);
-                        tpc.Authenticate();
-
-                        _workItemStore = tpc.GetService<WorkItemStore>();
-                        _initializationState = InitializationState.SuccessfullyInitialized;
-                        result = true;
+                        result = client;
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        _initializationState = InitializationState.FailedToInitialize;
-                        MessageBox.Show($"There was an error contacting TFS server to retrieve bug title information.\n\n{ex}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                        result = false;
+                        try
+                        {
+                            NetworkCredential nc = new NetworkCredential(RootConfiguration.Instance.TfsUsername, RootConfiguration.Instance.TfsPassword);
+                            VssCredentials vssCredentials = new VssCredentials(new WindowsCredential(nc));
+                            VssConnection vssConnection = new VssConnection(new Uri(serverName), vssCredentials);
+
+                            // Trust all certificates. This is usually a bad idea!! But our TFS servers often have bad certs...
+                            ServicePointManager.ServerCertificateValidationCallback = (_, __, ___, ____) => true;
+
+                            _tfsClients[serverClientTypePair] = result = vssConnection.GetClient<TClient>();
+                        }
+                        catch
+                        {
+                            _failedToConnect.Add(serverName);
+                            throw;
+                        }
                     }
-                }
-                else if (_initializationState == InitializationState.SuccessfullyInitialized)
-                {
-                    result = true;
                 }
 
                 return result;
             });
         }
 
-        public static Task<WorkItem> GetWorkItem(int workItemId)
+        public static Task<WorkItem> GetWorkItem(string serverName, int workItemId)
         {
             return Task.Run(async () =>
             {
-                if (await Initialize())
+                if (await Initialize<WorkItemTrackingHttpClient>(serverName) is { } workItemStore)
                 {
-                    return _workItemStore.GetWorkItem(workItemId);
+                    return await workItemStore.GetWorkItemAsync(workItemId);
                 }
 
                 return null;
             });
         }
 
-        private static WorkItemStore _workItemStore;
-        private static InitializationState _initializationState;
-
-        private enum InitializationState
+        public static Task<TfvcChangeset> GetChangeset(string serverName, int changesetId)
         {
-            Uninitialized,
-            SuccessfullyInitialized,
-            FailedToInitialize
+            return Task.Run(async () =>
+            {
+                if (await Initialize<TfvcHttpClient>(serverName) is TfvcHttpClient versionControl)
+                {
+                    return await versionControl.GetChangesetAsync(changesetId);
+                }
+
+                return null;
+            });
+        }
+
+        public static Task<GitCommit> GetCommit(string serverName, string projectName, string repositoryName, string commitId)
+        {
+            return Task.Run(async () =>
+            {
+                if (await Initialize<GitHttpClient>(serverName) is GitHttpClient versionControl)
+                {
+                    return await versionControl.GetCommitAsync(projectName, commitId, repositoryName);
+                }
+
+                return null;
+            });
+        }
+
+        private static readonly HashSet<string> _failedToConnect = new HashSet<string>();
+        private static readonly Dictionary<ServerClientTypePair, VssHttpClientBase> _tfsClients = new Dictionary<ServerClientTypePair, VssHttpClientBase>();
+    }
+
+    internal class ServerClientTypePair
+    {
+        public string ServerName { get; set; }
+
+        public Type VssHttpClient { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            return obj is ServerClientTypePair other
+                   && ServerName == other.ServerName
+                   && VssHttpClient == other.VssHttpClient;
+
+        }
+
+        protected bool Equals(ServerClientTypePair other)
+        {
+            return ServerName == other.ServerName
+                   && VssHttpClient == other.VssHttpClient;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return ((ServerName != null ? ServerName.GetHashCode() : 0) * 397) ^ (VssHttpClient != null ? VssHttpClient.GetHashCode() : 0);
+            }
         }
     }
 }

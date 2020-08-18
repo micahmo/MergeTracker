@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -9,6 +10,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using Microsoft.TeamFoundation.SourceControl.WebApi;
+using Microsoft.VisualStudio.Services.WebApi;
 using Newtonsoft.Json;
 
 namespace MergeTracker
@@ -50,10 +53,17 @@ namespace MergeTracker
 
         private async void GenerateName(MergeTarget mergeTarget)
         {
-            if (RootConfiguration.Instance.UseTfs &&
-                Name == "New Merge Item" && mergeTarget?.IsOriginal == true && int.TryParse(mergeTarget.BugNumber, out int bugNumber))
+            try
             {
-                Name = (await TfsUtils.GetWorkItem(bugNumber))?.Title ?? Name;
+                if (RootConfiguration.Instance.UseTfs &&
+                    Name == "New Merge Item" && mergeTarget?.IsOriginal == true && int.TryParse(mergeTarget.BugNumber, out int bugNumber))
+                {
+                    Name = (await TfsUtils.GetWorkItem(WorkItemServer, bugNumber))?.Fields["System.Title"]?.ToString() ?? Name;
+                }
+            }
+            catch (Exception ex)
+            {
+                LastError = $"There was an error retrieving the work item name.\n\n{ex}";
             }
         }
 
@@ -92,6 +102,41 @@ namespace MergeTracker
         public MergeItemCommands Commands { get; }
 
         public ObservableCollection<MergeTarget> MergeTargets { get; } = new ObservableCollection<MergeTarget>();
+
+        public string WorkItemServer
+        {
+            get => _workItemServer ?? RootConfiguration.Instance.DefaultWorkItemServer;
+            set => Set(nameof(WorkItemServer), ref _workItemServer, value);
+        }
+        private string _workItemServer;
+
+        public string SourceControlServer
+        {
+            get => _sourceControlSerer ?? RootConfiguration.Instance.DefaultSourceControlServer;
+            set => Set(nameof(SourceControlServer), ref _sourceControlSerer, value);
+        }
+        private string _sourceControlSerer;
+
+        [JsonIgnore]
+        public IEnumerable<ServerItem> WorkItemServers => RootConfiguration.Instance.WorkItemServers?.Select(s => new WorkItemServerItem {ServerName = s, IsSelected = s == WorkItemServer, MergeItem = this});
+
+        [JsonIgnore]
+        public IEnumerable<ServerItem> SourceControlServers => RootConfiguration.Instance.SourceControlServers?.Select(s => new SourceControlServerItem { ServerName = s, IsSelected = s == SourceControlServer, MergeItem = this });
+
+        [JsonIgnore]
+        public string LastError
+        {
+            get => _lastError;
+            set
+            {
+                Set(nameof(LastError), ref _lastError, value);
+                RaisePropertyChanged(nameof(HasLastError));
+            }
+        }
+        private string _lastError;
+
+        [JsonIgnore]
+        public bool HasLastError => string.IsNullOrEmpty(LastError) == false;
     }
 
     public class MergeItemCommands
@@ -152,23 +197,76 @@ namespace MergeTracker
             }
         }
 
-        private void OpenBug(DataGrid dataGrid)
+        private async void OpenBug(DataGrid dataGrid)
         {
-            if (dataGrid.SelectedItem is MergeTarget mergeTarget && string.IsNullOrEmpty(mergeTarget.BugNumber) == false)
-            {
-                Process.Start($"http://bel1tfs04.go.johnsoncontrols.com:8080/tfs/TSS/Unified/_workitems?id={mergeTarget.BugNumber}&_a=edit");
-            }
-        }
+            Mouse.OverrideCursor = Cursors.Wait;
 
-        private void OpenChangeset(DataGrid dataGrid)
-        {
-            if (dataGrid.SelectedItem is MergeTarget mergeTarget && string.IsNullOrEmpty(mergeTarget.Changeset) == false)
+            try
             {
-                foreach (string changeset in mergeTarget.Changeset.Split(new[] {",", ";"}, StringSplitOptions.RemoveEmptyEntries))
+                if (dataGrid.SelectedItem is MergeTarget mergeTarget && int.TryParse(mergeTarget.BugNumber, out int bugNumber))
                 {
-                    Process.Start($"http://bel1tfs04.go.johnsoncontrols.com:8080/tfs/TSS/Unified/_versionControl/changeset/{changeset}");
+                    if (await TfsUtils.GetWorkItem(Model.WorkItemServer, bugNumber) is { } workItem)
+                    {
+                        if (workItem.Links.Links.TryGetValue("html", out var html) && html is ReferenceLink htmlReferenceLink)
+                        {
+                            Process.Start(htmlReferenceLink.Href);
+                        }
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                Model.LastError = $"There was an error opening work item.\n\n{ex}";
+            }
+
+            Mouse.OverrideCursor = null;
+        }
+
+        private async void OpenChangeset(DataGrid dataGrid)
+        {
+            Mouse.OverrideCursor = Cursors.Wait;
+
+            try
+            {
+                if (dataGrid.SelectedItem is MergeTarget mergeTarget && string.IsNullOrEmpty(mergeTarget.Changeset) == false)
+                {
+                    foreach (string changesetString in mergeTarget.Changeset.Split(new[] {",", ";"}, StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        // Check if it's a TFS changeset or a Git commit
+                        if (changesetString.Any(c => char.IsLetter(c)))
+                        {
+                            // Git commit -- we need server name and project name
+                            if (Model.SourceControlServer.Split(new[] {"|"}, StringSplitOptions.RemoveEmptyEntries) is { } parts && parts.Length == 3)
+                            {
+                                if (await TfsUtils.GetCommit(parts[0], parts[1], parts[2], changesetString) is GitCommit commit)
+                                {
+                                    if (commit.Links.Links.TryGetValue("web", out var html) && html is ReferenceLink htmlReferenceLink)
+                                    {
+                                        Process.Start(htmlReferenceLink.Href);
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // TFS changeset
+                            if (int.TryParse(changesetString, out int changesetId) && await TfsUtils.GetChangeset(Model.SourceControlServer, changesetId) is TfvcChangeset changeset)
+                            {
+                                if (changeset.Links.Links.TryGetValue("web", out var html) && html is ReferenceLink htmlReferenceLink)
+                                {
+                                    Process.Start(htmlReferenceLink.Href);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Model.LastError = $"There was an error opening changeset.\n\n{ex}";
+            }
+
+            Mouse.OverrideCursor = null;
         }
 
         private void GenerateMessage(DataGrid dataGrid)

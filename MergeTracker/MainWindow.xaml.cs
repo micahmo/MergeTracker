@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Timers;
@@ -88,6 +87,9 @@ namespace MergeTracker
         public ICommand ClearFiltersCommand => _clearFiltersCommand ??= new RelayCommand(ClearFilters);
         private RelayCommand _clearFiltersCommand;
 
+        public ICommand ShowMergeItemContextMenuCommand => _showMergeItemContextMenuCommand ??= new RelayCommand<MergeItemGrid>(ShowMergeItemContextMenu);
+        private RelayCommand<MergeItemGrid> _showMergeItemContextMenuCommand;
+
         private void CreateMergeItem()
         {
             Model.RootConfiguration.MergeItems.Insert(0, new MergeItem(createDefaultTarget: true) {Name = "New Merge Item"});
@@ -128,6 +130,14 @@ namespace MergeTracker
             Model.RootConfiguration.ChangesetNumberFilter = string.Empty;
             Model.RootConfiguration.TargetBranchFilter = string.Empty;
             Model.RootConfiguration.NotCompletedFilter = false;
+        }
+
+        private void ShowMergeItemContextMenu(MergeItemGrid grid)
+        {
+            if (grid.ContextMenu is { })
+            {
+                grid.ContextMenu.IsOpen = true;
+            }
         }
     }
 }
