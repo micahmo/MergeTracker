@@ -84,13 +84,13 @@
 
                             <local:MergeItemGrid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
                             </local:MergeItemGrid.ColumnDefinitions>
 
                             <local:MergeItemGrid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition/>
                                 <RowDefinition Height="20"/>
