@@ -10,9 +10,9 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using LiteDB;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
 using Microsoft.VisualStudio.Services.WebApi;
-using Newtonsoft.Json;
 
 namespace MergeTracker
 {
@@ -22,7 +22,21 @@ namespace MergeTracker
         {
             Commands = new MergeItemCommands(this);
 
+            PropertyChanged += MergeItem_PropertyChanged;
             MergeTargets.CollectionChanged += MergeTargets_CollectionChanged;
+        }
+
+        private void MergeItem_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(MergeTargets):
+                    MergeTargets.ToList().ForEach(t =>
+                    {
+                        t.PropertyChanged += MergeTarget_PropertyChanged;
+                    });
+                    break;
+            }
         }
 
         private void MergeTargets_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -75,13 +89,8 @@ namespace MergeTracker
             }
         }
 
-        public MergeItem(bool createDefaultTarget) : this()
-        {
-            if (createDefaultTarget)
-            {
-                MergeTargets.Add(new MergeTarget {IsOriginal = true});
-            }
-        }
+        [BsonId]
+        public int ObjectId { get; set; }
 
         public string Name
         {
@@ -90,18 +99,16 @@ namespace MergeTracker
         }
         private string _name;
 
-        [JsonIgnore]
-        public bool IsFiltered
-        {
-            get => _isFiltered;
-            set => Set(nameof(IsFiltered), ref _isFiltered, value);
-        }
-        private bool _isFiltered;
-
-        [JsonIgnore]
+        [BsonIgnore]
         public MergeItemCommands Commands { get; }
 
-        public ObservableCollection<MergeTarget> MergeTargets { get; } = new ObservableCollection<MergeTarget>();
+        [BsonRef("mergetarget")]
+        public ObservableCollection<MergeTarget> MergeTargets
+        {
+            get => _mergeTargets;
+            set => Set(nameof(MergeTargets), ref _mergeTargets, value);
+        }
+        private ObservableCollection<MergeTarget> _mergeTargets = new ObservableCollection<MergeTarget>();
 
         public string WorkItemServer
         {
@@ -117,13 +124,13 @@ namespace MergeTracker
         }
         private string _sourceControlSerer;
 
-        [JsonIgnore]
+        [BsonIgnore]
         public IEnumerable<ServerItem> WorkItemServers => RootConfiguration.Instance.WorkItemServers?.Select(s => new WorkItemServerItem {ServerName = s, IsSelected = s == WorkItemServer, MergeItem = this});
 
-        [JsonIgnore]
+        [BsonIgnore]
         public IEnumerable<ServerItem> SourceControlServers => RootConfiguration.Instance.SourceControlServers?.Select(s => new SourceControlServerItem { ServerName = s, IsSelected = s == SourceControlServer, MergeItem = this });
 
-        [JsonIgnore]
+        [BsonIgnore]
         public string LastError
         {
             get => _lastError;
@@ -135,8 +142,21 @@ namespace MergeTracker
         }
         private string _lastError;
 
-        [JsonIgnore]
+        [BsonIgnore]
         public bool HasLastError => string.IsNullOrEmpty(LastError) == false;
+
+        public static event EventHandler MergeItemDeleted;
+
+        internal static void OnMergeItemDeleted()
+        {
+            MergeItemDeleted?.Invoke(null, EventArgs.Empty);
+        }
+
+        public void Save()
+        {
+            MergeTargets.ToList().ForEach(t => t.Save());
+            DatabaseEngine.MergeItemCollection.Update(this);
+        }
     }
 
     public class MergeItemCommands
@@ -168,7 +188,9 @@ namespace MergeTracker
 
         private void CreateMergeTarget()
         {
-            Model.MergeTargets.Add(new MergeTarget());
+            MergeTarget mergeTarget = new MergeTarget();
+            DatabaseEngine.MergeTargetCollection.Insert(mergeTarget);
+            Model.MergeTargets.Add(mergeTarget);
         }
 
         private void DeleteMergeTarget(DataGrid dataGrid)
@@ -176,6 +198,7 @@ namespace MergeTracker
             if (dataGrid.SelectedItem is MergeTarget mergeTarget)
             {
                 Model.MergeTargets.Remove(mergeTarget);
+                DatabaseEngine.MergeTargetCollection.Delete(mergeTarget.ObjectId);
             }
         }
 
@@ -185,7 +208,9 @@ namespace MergeTracker
 
             if (res == MessageBoxResult.Yes)
             {
-                RootConfiguration.Instance.MergeItems.Remove(Model);
+                Model.MergeTargets.ToList().ForEach(t => DatabaseEngine.MergeTargetCollection.Delete(t.ObjectId));
+                DatabaseEngine.MergeItemCollection.Delete(Model.ObjectId);
+                MergeItem.OnMergeItemDeleted();
             }
         }
 

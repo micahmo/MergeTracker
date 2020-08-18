@@ -1,11 +1,15 @@
 ﻿using System.Linq;
 using System.Windows;
 using GalaSoft.MvvmLight;
+using LiteDB;
 
 namespace MergeTracker
 {
     public class MergeTarget : ObservableObject
     {
+        [BsonId]
+        public int ObjectId { get; set; }
+
         public string TargetBranch
         {
             get => _targetBranch;
@@ -57,6 +61,11 @@ namespace MergeTracker
             string result = $"Merge fix for {originalBugNumber} ({originalVersionNumber}) into {targetVersionNumber}.";
 
             Clipboard.SetData(DataFormats.Text, result);
+        }
+
+        public void Save()
+        {
+            DatabaseEngine.MergeTargetCollection.Update(this);
         }
     }
 }

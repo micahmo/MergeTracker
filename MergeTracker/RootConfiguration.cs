@@ -1,18 +1,40 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
+using System.ComponentModel;
 using System.Linq;
 using GalaSoft.MvvmLight;
-using Newtonsoft.Json;
-using SpecialFolder = System.Environment.SpecialFolder;
+using LiteDB;
 
 namespace MergeTracker
 {
     public class RootConfiguration : ObservableObject
     {
+        public RootConfiguration()
+        {
+            PropertyChanged += RootConfiguration_PropertyChanged;
+        }
+
+        private void RootConfiguration_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(WorkItemServers):
+                    MergeItems.ToList().ForEach(i => i.RaisePropertyChanged(nameof(i.WorkItemServers)));
+                    break;
+                case nameof(SourceControlServers):
+                    MergeItems.ToList().ForEach(i => i.RaisePropertyChanged(nameof(i.SourceControlServers)));
+                    break;
+            }
+        }
+
         public static RootConfiguration Instance { get; private set; }
 
-        public ObservableCollection<MergeItem> MergeItems { get; } = new ObservableCollection<MergeItem>();
+        [BsonId]
+        public int ObjectId { get; set; }
+
+        [BsonIgnore]
+        public ObservableCollection<MergeItem> MergeItems { get; set; } = new ObservableCollection<MergeItem>();
 
         public string BugNumberFilter
         {
@@ -42,6 +64,13 @@ namespace MergeTracker
         }
         private bool _notCompletedFilter;
 
+        public bool ShowTfsSettings
+        {
+            get => _showTfsSettings;
+            set => Set(nameof(ShowTfsSettings), ref _showTfsSettings, value);
+        }
+        private bool _showTfsSettings;
+
         public bool UseTfs
         {
             get => _useTfs;
@@ -65,62 +94,66 @@ namespace MergeTracker
 
         public List<string> WorkItemServers
         {
-            get => _workItemServers;
-            set => Set(nameof(WorkItemServers), ref _workItemServers, value);
+            get => DelimitedWorkItemServers?.Split(new[] {";"}, StringSplitOptions.RemoveEmptyEntries).ToList();
+            set => DelimitedWorkItemServers = string.Join(";", value ?? Enumerable.Empty<string>());
         }
-        private List<string> _workItemServers;
 
-        [JsonIgnore]
+        [BsonIgnore]
+        public string DelimitedWorkItemServers
+        {
+            get => _delimitedWorkItemServers;
+            set
+            {
+                Set(nameof(DelimitedWorkItemServers), ref _delimitedWorkItemServers, value);
+                RaisePropertyChanged(nameof(WorkItemServers));
+            }
+        }
+
+        private string _delimitedWorkItemServers;
+
+        [BsonIgnore]
         public string DefaultWorkItemServer => WorkItemServers?.FirstOrDefault();
 
         public List<string> SourceControlServers
         {
-            get => _sourceControlServers;
-            set => Set(nameof(SourceControlServers), ref _sourceControlServers, value);
+            get => DelimitedSourceControlServers?.Split(new[] {";"}, StringSplitOptions.RemoveEmptyEntries).ToList();
+            set => DelimitedSourceControlServers = string.Join(":", value ?? Enumerable.Empty<string>());
         }
-        private List<string> _sourceControlServers;
 
-        [JsonIgnore]
+        [BsonIgnore]
+        public string DelimitedSourceControlServers
+        {
+            get => _delimitedSourceControlServers;
+            set
+            {
+                Set(nameof(DelimitedSourceControlServers), ref _delimitedSourceControlServers, value);
+                RaisePropertyChanged(nameof(SourceControlServers));
+            }
+        }
+
+        private string _delimitedSourceControlServers;
+
+        [BsonIgnore]
         public string DefaultSourceControlServer => SourceControlServers?.FirstOrDefault();
 
         public static RootConfiguration Load()
         {
-            RootConfiguration result = null;
-
-            try
+            if (DatabaseEngine.RootConfigurationCollection.Query().FirstOrDefault() is { } rootConfiguration)
             {
-                result = JsonSerialization.DeserializeObjectFromCustomConfigFile<RootConfiguration>(CONFIG_FILE_NAME, SpecialFolder.ApplicationData);
-            }
-            catch
-            {
-                // Intentionally empty
-            }
-
-            if (result is { })
-            {
-                return Instance = result;
+                Instance = rootConfiguration;
             }
             else
             {
-                Save(new RootConfiguration());
-                return Instance = Load();
+                DatabaseEngine.RootConfigurationCollection.Insert(Instance = new RootConfiguration());
             }
+
+            return Instance;
         }
 
-        public static void Save(RootConfiguration rootConfiguration)
+        public void Save()
         {
-            // Always back up the file
-            if (File.Exists(JsonSerialization.GetCustomConfigFilePath(SpecialFolder.ApplicationData, CONFIG_FILE_NAME, createIfNotExists: false)))
-            {
-                File.Copy(JsonSerialization.GetCustomConfigFilePath(SpecialFolder.ApplicationData, CONFIG_FILE_NAME),
-                          JsonSerialization.GetCustomConfigFilePath(SpecialFolder.ApplicationData, CONFIG_BACKUP_NAME), overwrite: true);
-            }
-
-            JsonSerialization.SerializeObjectToCustomConfigFile(CONFIG_FILE_NAME, rootConfiguration, SpecialFolder.ApplicationData);
+            Instance.MergeItems.ToList().ForEach(i => i.Save());
+            DatabaseEngine.RootConfigurationCollection.Update(this);
         }
-
-        private const string CONFIG_FILE_NAME = "MergeTracker.config";
-
-        private const string CONFIG_BACKUP_NAME = "MergeTracker.config.bak";
     }
 }
