@@ -78,8 +78,9 @@ namespace MergeTracker
             string originalBugNumber = mergeItem.MergeTargets.FirstOrDefault(t => t.IsOriginal)?.BugNumber ?? "UNKNOWN_BUG";
             string originalVersionNumber = mergeItem.MergeTargets.FirstOrDefault(t => t.IsOriginal)?.TargetBranch ?? "UNKNOWN_VERSION";
             string targetVersionNumber = TargetBranch ?? "UNKNOWN_TARGET_BRANCH";
+            string targetBugNumber = string.IsNullOrEmpty(BugNumber) ? string.Empty : $"For bug {BugNumber}: ";
 
-            string result = $"Merge fix for {originalBugNumber} ({originalVersionNumber}) into {targetVersionNumber}.";
+            string result = $"{targetBugNumber}Merge fix for {originalBugNumber} ({originalVersionNumber}) into {targetVersionNumber}.";
 
             Clipboard.SetData(DataFormats.Text, result);
         }
