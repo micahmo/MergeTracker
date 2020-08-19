@@ -109,8 +109,8 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <local:MergeItemGrid>
-                            <local:MergeItemGrid.ContextMenu>
-                                <ContextMenu x:Name="MergeItemContextMenu">
+                            <local:MergeItemGrid.Resources>
+                                <ContextMenu x:Key="MergeTargetContextMenu">
                                     <MenuItem Header="Work Item Server" IsCheckable="False" ItemsSource="{Binding WorkItemServers}" IsEnabled="{c:Binding 'WorkItemServer != null'}">
                                         <MenuItem.ItemContainerStyle>
                                             <Style TargetType="MenuItem">
@@ -128,7 +128,10 @@
                                         </MenuItem.ItemContainerStyle>
                                     </MenuItem>
                                 </ContextMenu>
-                            </local:MergeItemGrid.ContextMenu>
+                                <Style x:Key="MergeTargetRowStyle" TargetType="{x:Type DataGridRow}">
+                                    <Setter Property="ContextMenu" Value="{StaticResource MergeTargetContextMenu}" />
+                                </Style>
+                            </local:MergeItemGrid.Resources>
 
                             <local:MergeItemGrid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -159,7 +162,8 @@
                                     Command="{Binding Commands.DeleteCommand}"/>
 
                             <DataGrid x:Name="DataGrid" Grid.Column="0" Grid.ColumnSpan="5" Grid.Row="1" Margin="5" ItemsSource="{Binding MergeTargets}" AutoGenerateColumns="False"
-                                      GridLinesVisibility="None" HeadersVisibility="Column" BorderThickness="0" CanUserAddRows="False">
+                                      GridLinesVisibility="None" HeadersVisibility="Column" BorderThickness="0" CanUserAddRows="False"
+                                      RowStyle="{StaticResource MergeTargetRowStyle}">
                                 <i:Interaction.Behaviors>
                                     <local:IgnoreMouseWheelBehavior/>
                                 </i:Interaction.Behaviors>
@@ -297,8 +301,8 @@
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <Button Content="▼" Margin="5" Padding="5,0,5,0"
-                                                        Command="{Binding DataContext.Commands.ShowMergeItemContextMenuCommand, RelativeSource={RelativeSource AncestorType=local:MainWindow}}"
-                                                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=local:MergeItemGrid}}"/>
+                                                        Command="{Binding DataContext.Commands.ShowMergeTargetContextMenuCommand, RelativeSource={RelativeSource AncestorType=local:MainWindow}}"
+                                                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}}"/>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>

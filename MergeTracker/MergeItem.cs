@@ -72,7 +72,7 @@ namespace MergeTracker
                 if (RootConfiguration.Instance.UseTfs &&
                     Name == "New Merge Item" && mergeTarget?.IsOriginal == true && int.TryParse(mergeTarget.BugNumber, out int bugNumber))
                 {
-                    Name = (await TfsUtils.GetWorkItem(WorkItemServer, bugNumber))?.Fields["System.Title"]?.ToString() ?? Name;
+                    Name = (await TfsUtils.GetWorkItem(mergeTarget.WorkItemServer, bugNumber))?.Fields["System.Title"]?.ToString() ?? Name;
                 }
             }
             catch (Exception ex)
@@ -109,26 +109,6 @@ namespace MergeTracker
             set => Set(nameof(MergeTargets), ref _mergeTargets, value);
         }
         private ObservableCollection<MergeTarget> _mergeTargets = new ObservableCollection<MergeTarget>();
-
-        public string WorkItemServer
-        {
-            get => _workItemServer ?? RootConfiguration.Instance.DefaultWorkItemServer;
-            set => Set(nameof(WorkItemServer), ref _workItemServer, value);
-        }
-        private string _workItemServer;
-
-        public string SourceControlServer
-        {
-            get => _sourceControlSerer ?? RootConfiguration.Instance.DefaultSourceControlServer;
-            set => Set(nameof(SourceControlServer), ref _sourceControlSerer, value);
-        }
-        private string _sourceControlSerer;
-
-        [BsonIgnore]
-        public IEnumerable<ServerItem> WorkItemServers => RootConfiguration.Instance.WorkItemServers?.Select(s => new WorkItemServerItem {ServerName = s, IsSelected = s == WorkItemServer, MergeItem = this});
-
-        [BsonIgnore]
-        public IEnumerable<ServerItem> SourceControlServers => RootConfiguration.Instance.SourceControlServers?.Select(s => new SourceControlServerItem { ServerName = s, IsSelected = s == SourceControlServer, MergeItem = this });
 
         [BsonIgnore]
         public string LastError
@@ -230,7 +210,7 @@ namespace MergeTracker
             {
                 if (dataGrid.SelectedItem is MergeTarget mergeTarget && int.TryParse(mergeTarget.BugNumber, out int bugNumber))
                 {
-                    if (await TfsUtils.GetWorkItem(Model.WorkItemServer, bugNumber) is { } workItem)
+                    if (await TfsUtils.GetWorkItem(mergeTarget.WorkItemServer, bugNumber) is { } workItem)
                     {
                         if (workItem.Links.Links.TryGetValue("html", out var html) && html is ReferenceLink htmlReferenceLink)
                         {
@@ -261,7 +241,7 @@ namespace MergeTracker
                         if (changesetString.Any(c => char.IsLetter(c)))
                         {
                             // Git commit -- we need server name and project name
-                            if (Model.SourceControlServer.Split(new[] {"|"}, StringSplitOptions.RemoveEmptyEntries) is { } parts && parts.Length == 3)
+                            if (mergeTarget.SourceControlServer.Split(new[] {"|"}, StringSplitOptions.RemoveEmptyEntries) is { } parts && parts.Length == 3)
                             {
                                 if (await TfsUtils.GetCommit(parts[0], parts[1], parts[2], changesetString) is GitCommit commit)
                                 {
@@ -275,7 +255,7 @@ namespace MergeTracker
                         else
                         {
                             // TFS changeset
-                            if (int.TryParse(changesetString, out int changesetId) && await TfsUtils.GetChangeset(Model.SourceControlServer, changesetId) is TfvcChangeset changeset)
+                            if (int.TryParse(changesetString, out int changesetId) && await TfsUtils.GetChangeset(mergeTarget.SourceControlServer, changesetId) is TfvcChangeset changeset)
                             {
                                 if (changeset.Links.Links.TryGetValue("web", out var html) && html is ReferenceLink htmlReferenceLink)
                                 {

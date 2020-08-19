@@ -20,10 +20,10 @@ namespace MergeTracker
             switch (e.PropertyName)
             {
                 case nameof(WorkItemServers):
-                    MergeItems.ToList().ForEach(i => i.RaisePropertyChanged(nameof(i.WorkItemServers)));
+                    MergeItems.ToList().ForEach(i => i.MergeTargets.ToList().ForEach(t => t.RaisePropertyChanged(nameof(t.WorkItemServers))));
                     break;
                 case nameof(SourceControlServers):
-                    MergeItems.ToList().ForEach(i => i.RaisePropertyChanged(nameof(i.SourceControlServers)));
+                    MergeItems.ToList().ForEach(i => i.MergeTargets.ToList().ForEach(t => t.RaisePropertyChanged(nameof(t.SourceControlServers))));
                     break;
             }
         }
@@ -117,7 +117,7 @@ namespace MergeTracker
         public List<string> SourceControlServers
         {
             get => DelimitedSourceControlServers?.Split(new[] {";"}, StringSplitOptions.RemoveEmptyEntries).ToList();
-            set => DelimitedSourceControlServers = string.Join(":", value ?? Enumerable.Empty<string>());
+            set => DelimitedSourceControlServers = string.Join(";", value ?? Enumerable.Empty<string>());
         }
 
         [BsonIgnore]

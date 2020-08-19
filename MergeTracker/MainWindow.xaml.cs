@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Timers;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
@@ -112,8 +113,8 @@ namespace MergeTracker
         public ICommand ClearFiltersCommand => _clearFiltersCommand ??= new RelayCommand(ClearFilters);
         private RelayCommand _clearFiltersCommand;
 
-        public ICommand ShowMergeItemContextMenuCommand => _showMergeItemContextMenuCommand ??= new RelayCommand<MergeItemGrid>(ShowMergeItemContextMenu);
-        private RelayCommand<MergeItemGrid> _showMergeItemContextMenuCommand;
+        public ICommand ShowMergeTargetContextMenuCommand => _showMergeItemContextMenuCommand ??= new RelayCommand<DataGridRow>(ShowMergeTargetContextMenu);
+        private RelayCommand<DataGridRow> _showMergeItemContextMenuCommand;
 
         public ICommand ToggleTfsSettingsVisibilityCommand => _toggleTfsSettingsVisibilityCommand ??= new RelayCommand(ToggleTfsSettingsVisibility);
         private RelayCommand _toggleTfsSettingsVisibilityCommand;
@@ -208,11 +209,16 @@ namespace MergeTracker
             Model.RootConfiguration.NotCompletedFilter = false;
         }
 
-        private void ShowMergeItemContextMenu(MergeItemGrid grid)
+        private void ShowMergeTargetContextMenu(DataGridRow row)
         {
-            if (grid.ContextMenu is { })
+            if (row.ContextMenu is { })
             {
-                grid.ContextMenu.IsOpen = true;
+                // Important: Must initialize PlacementTarget before showing ContextMenu,
+                // otherwise binding will not be able to resolve.
+                row.ContextMenu.PlacementTarget = row;
+
+                // Show the context menu
+                row.ContextMenu.IsOpen = true;
             }
         }
 

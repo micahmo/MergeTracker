@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using GalaSoft.MvvmLight;
 using LiteDB;
@@ -51,6 +52,26 @@ namespace MergeTracker
             set => Set(nameof(Notes), ref _notes, value);
         }
         private string _notes;
+
+        public string WorkItemServer
+        {
+            get => _workItemServer ?? RootConfiguration.Instance.DefaultWorkItemServer;
+            set => Set(nameof(WorkItemServer), ref _workItemServer, value);
+        }
+        private string _workItemServer;
+
+        public string SourceControlServer
+        {
+            get => _sourceControlSerer ?? RootConfiguration.Instance.DefaultSourceControlServer;
+            set => Set(nameof(SourceControlServer), ref _sourceControlSerer, value);
+        }
+        private string _sourceControlSerer;
+
+        [BsonIgnore]
+        public IEnumerable<ServerItem> WorkItemServers => RootConfiguration.Instance.WorkItemServers?.Select(s => new WorkItemServerItem { ServerName = s, IsSelected = s == WorkItemServer, MergeTarget = this });
+
+        [BsonIgnore]
+        public IEnumerable<ServerItem> SourceControlServers => RootConfiguration.Instance.SourceControlServers?.Select(s => new SourceControlServerItem { ServerName = s, IsSelected = s == SourceControlServer, MergeTarget = this });
 
         public void GenerateCheckinNote(MergeItem mergeItem)
         {

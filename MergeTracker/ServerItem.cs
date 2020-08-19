@@ -9,7 +9,7 @@ namespace MergeTracker
 
         public bool IsSelected { get; set; }
 
-        public MergeItem MergeItem { get; set; }
+        public MergeTarget MergeTarget { get; set; }
 
         public override string ToString() => ServerName;
 
@@ -23,8 +23,8 @@ namespace MergeTracker
     {
         public override void Select()
         {
-            MergeItem.SourceControlServer = ServerName;
-            MergeItem.RaisePropertyChanged(nameof(MergeTracker.MergeItem.SourceControlServers));
+            MergeTarget.SourceControlServer = ServerName;
+            MergeTarget.RaisePropertyChanged(nameof(MergeTarget.SourceControlServers));
         }
     }
 
@@ -32,8 +32,8 @@ namespace MergeTracker
     {
         public override void Select()
         {
-            MergeItem.WorkItemServer = ServerName;
-            MergeItem.RaisePropertyChanged(nameof(MergeTracker.MergeItem.WorkItemServers));
+            MergeTarget.WorkItemServer = ServerName;
+            MergeTarget.RaisePropertyChanged(nameof(MergeTarget.WorkItemServers));
         }
     }
 }
