@@ -79,6 +79,11 @@ namespace MergeTracker
         {
             Model.RootConfiguration.TfsPassword = TfsPasswordBox.Password;
         }
+
+        private void ReloadCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            Model.Commands.ReloadMergeItemsCommand.Execute(null);
+        }
     }
 
     internal class MainWindowModel : ObservableObject

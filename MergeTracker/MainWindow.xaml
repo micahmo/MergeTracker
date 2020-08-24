@@ -10,6 +10,11 @@
         Title="Merge Tracker" Height="800" Width="1500"
 
         Closing="Window_Closing">
+
+    <Window.CommandBindings>
+        <CommandBinding Command="{x:Static local:ShortcutCommands.ReloadCommand}" Executed="ReloadCommand_Executed"/>
+    </Window.CommandBindings>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
