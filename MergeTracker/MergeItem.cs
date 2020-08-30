@@ -31,6 +31,7 @@ namespace MergeTracker
             switch (e.PropertyName)
             {
                 case nameof(MergeTargets):
+                    MergeTargets.CollectionChanged += MergeTargets_CollectionChanged;
                     MergeTargets.ToList().ForEach(t =>
                     {
                         t.PropertyChanged += MergeTarget_PropertyChanged;
