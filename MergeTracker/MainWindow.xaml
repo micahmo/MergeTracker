@@ -205,7 +205,7 @@
                                     <DataGridTemplateColumn Header="Completed" Width="Auto">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <CheckBox IsChecked="{Binding IsCompleted, UpdateSourceTrigger=PropertyChanged}" Margin="5" HorizontalAlignment="Center"/>
+                                                <CheckBox IsChecked="{Binding IsCompleted, UpdateSourceTrigger=PropertyChanged}" Margin="5" Height="20" HorizontalAlignment="Center"/>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
@@ -213,7 +213,7 @@
                                     <DataGridTemplateColumn Header="Original" Width="Auto">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <RadioButton IsChecked="{Binding IsOriginal, UpdateSourceTrigger=PropertyChanged}" Margin="5" HorizontalAlignment="Center"/>
+                                                <RadioButton IsChecked="{Binding IsOriginal, UpdateSourceTrigger=PropertyChanged}" Margin="5" Height="20" HorizontalAlignment="Center"/>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
@@ -228,13 +228,13 @@
                                                         <ColumnDefinition Width="Auto"/>
                                                     </Grid.ColumnDefinitions>
 
-                                                    <TextBox Grid.Column="0" Text="{Binding BugNumber, UpdateSourceTrigger=PropertyChanged, Delay=500}" Margin="5,5,0,5"
+                                                    <TextBox Grid.Column="0" Text="{Binding BugNumber, UpdateSourceTrigger=PropertyChanged, Delay=500}" Margin="5,0,0,0" Height="20"
                                                              ToolTip="{Binding BugNumber}"/>
-                                                    <Button Grid.Column="1" Width="20" Margin="0,5,0,5" HorizontalAlignment="Right" Content="❐"
+                                                    <Button Grid.Column="1" Width="20" Height="20" HorizontalAlignment="Right" Content="❐"
                                                             Command="{Binding DataContext.Commands.CopyBugNumberCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                             CommandParameter="{Binding ElementName=DataGrid}"
                                                             ToolTip="Copy work item number to clipboard"/>
-                                                    <Button Grid.Column="2" Width="20" Margin="0,5,5,5" HorizontalAlignment="Right" Content="◥"
+                                                    <Button Grid.Column="2" Width="20" Margin="0,0,5,0" Height="20" HorizontalAlignment="Right" Content="◥"
                                                             Command="{Binding DataContext.Commands.OpenBugCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                             CommandParameter="{Binding ElementName=DataGrid}"
                                                             ToolTip="Open work item in TFS web"/>
@@ -246,7 +246,7 @@
                                     <DataGridTemplateColumn Header="Target Branch" Width="*">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <TextBox Text="{Binding TargetBranch, UpdateSourceTrigger=PropertyChanged}" Margin="5"
+                                                <TextBox Text="{Binding TargetBranch, UpdateSourceTrigger=PropertyChanged}" Margin="5,0,5,0" Height="20"
                                                          ToolTip="{Binding TargetBranch}"/>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
@@ -261,9 +261,9 @@
                                                         <ColumnDefinition Width="Auto"/>
                                                     </Grid.ColumnDefinitions>
 
-                                                    <TextBox Text="{Binding Changeset, UpdateSourceTrigger=PropertyChanged}" Margin="5,5,0,5"
+                                                    <TextBox Text="{Binding Changeset, UpdateSourceTrigger=PropertyChanged}" Margin="5,0,0,0" Height="20"
                                                              ToolTip="{Binding Changeset}"/>
-                                                    <Button Grid.Column="1" Width="20" Margin="0,5,5,5" HorizontalAlignment="Right" Content="◥"
+                                                    <Button Grid.Column="1" Width="20" Margin="0,0,5,0" Height="20" HorizontalAlignment="Right" Content="◥"
                                                             Command="{Binding DataContext.Commands.OpenChangesetCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                             CommandParameter="{Binding ElementName=DataGrid}"
                                                             ToolTip="Open changeset(s) in TFS web"/>
@@ -276,6 +276,7 @@
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBox Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" Margin="5"
+                                                         TextWrapping="Wrap"
                                                          ToolTip="{Binding Notes}"/>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
@@ -284,7 +285,7 @@
                                     <DataGridTemplateColumn Header="Generate Check-in Message" Width="Auto">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <Button Content="Generate Check-in Message" Margin="5" Padding="5,0,5,0"
+                                                <Button Content="Generate Check-in Message" Margin="5,0,5,0" Height="20" Padding="5,0,5,0"
                                                         Command="{Binding DataContext.Commands.GenerateMessageCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                         CommandParameter="{Binding ElementName=DataGrid}"
                                                         ToolTip="Generates a check-in message containing the original work item number and branch info and the target branch.&#x0a;Copies the message to the clipboard."/>
@@ -295,7 +296,7 @@
                                     <DataGridTemplateColumn Header="Delete" Width="Auto">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <Button Content="Delete" Margin="5" Padding="5,0,5,0"
+                                                <Button Content="Delete" Margin="5,0,5,0" Height="20" Padding="5,0,5,0"
                                                         Command="{Binding DataContext.Commands.DeleteMergeTargetCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                         CommandParameter="{Binding ElementName=DataGrid}"/>
                                             </DataTemplate>
@@ -305,7 +306,7 @@
                                     <DataGridTemplateColumn Header="Menu" Width="Auto">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <Button Content="▼" Margin="5" Padding="5,0,5,0"
+                                                <Button Content="▼" Margin="5,0,5,0" Height="20" Padding="5,0,5,0"
                                                         Command="{Binding DataContext.Commands.ShowMergeTargetContextMenuCommand, RelativeSource={RelativeSource AncestorType=local:MainWindow}}"
                                                         CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}}"/>
                                             </DataTemplate>
