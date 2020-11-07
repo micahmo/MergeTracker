@@ -7,6 +7,7 @@ using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using LiteDB;
@@ -141,8 +142,6 @@ namespace MergeTracker
 
         private void ReloadMergeItems()
         {
-            Mouse.OverrideCursor = Cursors.Wait;
-
             // Important: Always save the RootConfiguration first.
             // 1. This allows us to query on the latest data.
             // 2. This prevents us from losing any data when we clear the MergeItem list from memory.
@@ -175,7 +174,7 @@ namespace MergeTracker
                 mergeTargetsQuery = (mergeTargetsQuery ?? DatabaseEngine.MergeTargetCollection.Query())
                     .Where(t => t.IsCompleted == false);
             }
-            
+
             // We have finished filtering. See if we have any query on MergeTargets, in which case we need to apply this filter to the MergeItems.
             if (mergeTargetsQuery is { })
             {
@@ -200,10 +199,12 @@ namespace MergeTracker
                 }
             }
 
-            Model.RootConfiguration.MergeItems.Clear();
-            (mergeItems ?? mergeItemsCollection.FindAll()).OrderByDescending(i => i.ObjectId).ToList().ForEach(i => Model.RootConfiguration.MergeItems.Add(i));
-
-            Mouse.OverrideCursor = null;
+            // Use a wait cursor with a specific dispatcher priority, so that we can ensure that it doesn't change until the UI is responsive
+            using (new WaitCursor(Cursors.Wait, DispatcherPriority.Loaded))
+            {
+                Model.RootConfiguration.MergeItems.Clear();
+                (mergeItems ?? mergeItemsCollection.FindAll()).OrderByDescending(i => i.ObjectId).ToList().ForEach(i => Model.RootConfiguration.MergeItems.Add(i));
+            }
         }
 
         private void ClearFilters()
