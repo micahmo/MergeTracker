@@ -176,7 +176,7 @@ namespace MergeTracker
             if (Model.RootConfiguration.NotCompletedFilter)
             {
                 mergeTargetsQuery = (mergeTargetsQuery ?? DatabaseEngine.MergeTargetCollection.Query())
-                    .Where(t => t.IsCompleted == false);
+                    .Where(t => t.IsCompleted != true);
             }
 
             // We have finished filtering. See if we have any query on MergeTargets, in which case we need to apply this filter to the MergeItems.

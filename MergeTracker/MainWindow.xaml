@@ -197,6 +197,10 @@
                                                 <Setter Property="Background" Value="LightGreen" />
                                                 <Setter Property="BorderBrush" Value="LightGreen" />
                                             </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsCompleted}" Value="{x:Null}">
+                                                <Setter Property="Background" Value="LemonChiffon" />
+                                                <Setter Property="BorderBrush" Value="LemonChiffon" />
+                                            </DataTrigger>
                                             <DataTrigger Binding="{Binding IsCompleted}" Value="False">
                                                 <Setter Property="Background" Value="Pink" />
                                                 <Setter Property="BorderBrush" Value="Pink" />
@@ -211,7 +215,8 @@
                                     <DataGridTemplateColumn Header="Completed" Width="Auto">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <CheckBox IsChecked="{Binding IsCompleted, UpdateSourceTrigger=PropertyChanged}" Margin="5" Height="20" HorizontalAlignment="Center"/>
+                                                <CheckBox IsChecked="{Binding IsCompleted, UpdateSourceTrigger=PropertyChanged}" Margin="5" Height="20" HorizontalAlignment="Center"
+                                                          IsThreeState="True"/>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
