@@ -205,74 +205,80 @@ namespace MergeTracker
 
         private async void OpenBug(DataGrid dataGrid)
         {
-            Mouse.OverrideCursor = Cursors.Wait;
-
-            try
+            if (RootConfiguration.Instance.UseTfs)
             {
-                if (dataGrid.SelectedItem is MergeTarget mergeTarget && int.TryParse(mergeTarget.BugNumber, out int bugNumber))
+                Mouse.OverrideCursor = Cursors.Wait;
+
+                try
                 {
-                    if (await TfsUtils.GetWorkItem(mergeTarget.WorkItemServer, bugNumber) is { } workItem)
+                    if (dataGrid.SelectedItem is MergeTarget mergeTarget && int.TryParse(mergeTarget.BugNumber, out int bugNumber))
                     {
-                        if (workItem.Links.Links.TryGetValue("html", out var html) && html is ReferenceLink htmlReferenceLink)
+                        if (await TfsUtils.GetWorkItem(mergeTarget.WorkItemServer, bugNumber) is { } workItem)
                         {
-                            Process.Start(htmlReferenceLink.Href);
+                            if (workItem.Links.Links.TryGetValue("html", out var html) && html is ReferenceLink htmlReferenceLink)
+                            {
+                                Process.Start(htmlReferenceLink.Href);
+                            }
                         }
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                Model.LastError = $"There was an error opening work item.\n\n{ex}";
-            }
+                catch (Exception ex)
+                {
+                    Model.LastError = $"There was an error opening work item.\n\n{ex}";
+                }
 
-            Mouse.OverrideCursor = null;
+                Mouse.OverrideCursor = null;
+            }
         }
 
         private async void OpenChangeset(DataGrid dataGrid)
         {
-            Mouse.OverrideCursor = Cursors.Wait;
-
-            try
+            if (RootConfiguration.Instance.UseTfs)
             {
-                if (dataGrid.SelectedItem is MergeTarget mergeTarget && string.IsNullOrEmpty(mergeTarget.Changeset) == false)
+                Mouse.OverrideCursor = Cursors.Wait;
+
+                try
                 {
-                    foreach (string changesetString in mergeTarget.Changeset.Split(new[] {",", ";"}, StringSplitOptions.RemoveEmptyEntries))
+                    if (dataGrid.SelectedItem is MergeTarget mergeTarget && string.IsNullOrEmpty(mergeTarget.Changeset) == false)
                     {
-                        // Check if it's a TFS changeset or a Git commit
-                        if (changesetString.Any(c => char.IsLetter(c)))
+                        foreach (string changesetString in mergeTarget.Changeset.Split(new[] {",", ";"}, StringSplitOptions.RemoveEmptyEntries))
                         {
-                            // Git commit -- we need server name and project name
-                            if (mergeTarget.SourceControlServer.Split(new[] {"|"}, StringSplitOptions.RemoveEmptyEntries) is { } parts && parts.Length == 3)
+                            // Check if it's a TFS changeset or a Git commit
+                            if (changesetString.Any(c => char.IsLetter(c)))
                             {
-                                if (await TfsUtils.GetCommit(parts[0], parts[1], parts[2], changesetString) is GitCommit commit)
+                                // Git commit -- we need server name and project name
+                                if (mergeTarget.SourceControlServer.Split(new[] {"|"}, StringSplitOptions.RemoveEmptyEntries) is { } parts && parts.Length == 3)
                                 {
-                                    if (commit.Links.Links.TryGetValue("web", out var html) && html is ReferenceLink htmlReferenceLink)
+                                    if (await TfsUtils.GetCommit(parts[0], parts[1], parts[2], changesetString) is GitCommit commit)
+                                    {
+                                        if (commit.Links.Links.TryGetValue("web", out var html) && html is ReferenceLink htmlReferenceLink)
+                                        {
+                                            Process.Start(htmlReferenceLink.Href);
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                // TFS changeset
+                                if (int.TryParse(changesetString, out int changesetId) && await TfsUtils.GetChangeset(mergeTarget.SourceControlServer, changesetId) is TfvcChangeset changeset)
+                                {
+                                    if (changeset.Links.Links.TryGetValue("web", out var html) && html is ReferenceLink htmlReferenceLink)
                                     {
                                         Process.Start(htmlReferenceLink.Href);
                                     }
                                 }
                             }
                         }
-                        else
-                        {
-                            // TFS changeset
-                            if (int.TryParse(changesetString, out int changesetId) && await TfsUtils.GetChangeset(mergeTarget.SourceControlServer, changesetId) is TfvcChangeset changeset)
-                            {
-                                if (changeset.Links.Links.TryGetValue("web", out var html) && html is ReferenceLink htmlReferenceLink)
-                                {
-                                    Process.Start(htmlReferenceLink.Href);
-                                }
-                            }
-                        }
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                Model.LastError = $"There was an error opening changeset.\n\n{ex}";
-            }
+                catch (Exception ex)
+                {
+                    Model.LastError = $"There was an error opening changeset.\n\n{ex}";
+                }
 
-            Mouse.OverrideCursor = null;
+                Mouse.OverrideCursor = null;
+            }
         }
 
         private void GenerateMessage(DataGrid dataGrid)
