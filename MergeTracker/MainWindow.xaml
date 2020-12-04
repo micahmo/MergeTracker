@@ -9,6 +9,7 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:dataConverters="clr-namespace:MergeTracker.DataConverters"
         mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=local:MainWindowModel}"
         Title="Merge Tracker" Height="800" Width="1500"
 
         Closing="Window_Closing">
@@ -121,7 +122,7 @@
                     <DataTemplate>
                         <local:MergeItemGrid>
                             <local:MergeItemGrid.Resources>
-                                <ContextMenu x:Key="MergeTargetContextMenu">
+                                <ContextMenu x:Key="MergeTargetContextMenu" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
                                     <MenuItem Header="Work Item Server" IsCheckable="False" ItemsSource="{Binding WorkItemServers}" IsEnabled="{c:Binding 'WorkItemServer != null'}">
                                         <MenuItem.ItemContainerStyle>
                                             <Style TargetType="MenuItem">
@@ -193,15 +194,15 @@
                                                 <Setter Property="BorderBrush" Value="{x:Null}" />
                                             </Trigger>
 
-                                            <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                                            <DataTrigger Binding="{Binding IsCompleted}" Value="True" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
                                                 <Setter Property="Background" Value="LightGreen" />
                                                 <Setter Property="BorderBrush" Value="LightGreen" />
                                             </DataTrigger>
-                                            <DataTrigger Binding="{Binding IsCompleted}" Value="{x:Null}">
+                                            <DataTrigger Binding="{Binding IsCompleted}" Value="{x:Null}" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
                                                 <Setter Property="Background" Value="LemonChiffon" />
                                                 <Setter Property="BorderBrush" Value="LemonChiffon" />
                                             </DataTrigger>
-                                            <DataTrigger Binding="{Binding IsCompleted}" Value="False">
+                                            <DataTrigger Binding="{Binding IsCompleted}" Value="False" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
                                                 <Setter Property="Background" Value="Pink" />
                                                 <Setter Property="BorderBrush" Value="Pink" />
                                             </DataTrigger>
@@ -212,7 +213,7 @@
 
                                 <DataGrid.Columns>
 
-                                    <DataGridTemplateColumn Header="Completed" Width="Auto">
+                                    <DataGridTemplateColumn Header="Completed" Width="Auto" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <CheckBox IsChecked="{Binding IsCompleted, UpdateSourceTrigger=PropertyChanged}" Margin="5" Height="20" HorizontalAlignment="Center"
@@ -221,7 +222,7 @@
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
 
-                                    <DataGridTemplateColumn Header="Original" Width="Auto">
+                                    <DataGridTemplateColumn Header="Original" Width="Auto" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <RadioButton IsChecked="{Binding IsOriginal, UpdateSourceTrigger=PropertyChanged}" Margin="5" Height="20" HorizontalAlignment="Center"/>
@@ -229,7 +230,7 @@
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
 
-                                    <DataGridTemplateColumn Header="Work Item Number" Width="*">
+                                    <DataGridTemplateColumn Header="Work Item Number" Width="*" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <Grid>
@@ -259,7 +260,7 @@
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
 
-                                    <DataGridTemplateColumn Header="Target Branch" Width="*">
+                                    <DataGridTemplateColumn Header="Target Branch" Width="*" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <xctk:RichTextBox Margin="5,0,5,0" Height="20" ToolTip="{Binding TargetBranch}"
@@ -273,7 +274,7 @@
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
 
-                                    <DataGridTemplateColumn Header="Changeset(s)" Width="*">
+                                    <DataGridTemplateColumn Header="Changeset(s)" Width="*" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <Grid>
@@ -298,7 +299,7 @@
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
 
-                                    <DataGridTemplateColumn Header="Notes" Width="*">
+                                    <DataGridTemplateColumn Header="Notes" Width="*" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBox Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" Margin="5"
