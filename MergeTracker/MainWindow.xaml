@@ -6,6 +6,8 @@
         xmlns:local="clr-namespace:MergeTracker"
         xmlns:c="clr-namespace:CalcBinding;assembly=CalcBinding"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:dataConverters="clr-namespace:MergeTracker.DataConverters"
         mc:Ignorable="d"
         Title="Merge Tracker" Height="800" Width="1500"
 
@@ -14,6 +16,10 @@
     <Window.CommandBindings>
         <CommandBinding Command="{x:Static local:ShortcutCommands.ReloadCommand}" Executed="ReloadCommand_Executed"/>
     </Window.CommandBindings>
+
+    <Window.Resources>
+        <dataConverters:HighlightedTextConverter x:Key="HighlightedTextConverter"/>
+    </Window.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -228,8 +234,13 @@
                                                         <ColumnDefinition Width="Auto"/>
                                                     </Grid.ColumnDefinitions>
 
-                                                    <TextBox Grid.Column="0" Text="{Binding BugNumber, UpdateSourceTrigger=PropertyChanged, Delay=500}" Margin="5,0,0,0" Height="20"
-                                                             ToolTip="{Binding BugNumber}"/>
+                                                    <xctk:RichTextBox Grid.Column="0" Margin="5,0,0,0" Height="20" ToolTip="{Binding BugNumber}"
+                                                                      Text="{Binding BugNumber, UpdateSourceTrigger=PropertyChanged,
+                                                                      Converter={StaticResource HighlightedTextConverter}, ConverterParameter=BugNumber}">
+                                                        <xctk:RichTextBox.TextFormatter>
+                                                            <xctk:XamlFormatter />
+                                                        </xctk:RichTextBox.TextFormatter>
+                                                    </xctk:RichTextBox>
                                                     <Button Grid.Column="1" Width="20" Height="20" HorizontalAlignment="Right" Content="❐"
                                                             Command="{Binding DataContext.Commands.CopyBugNumberCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                             CommandParameter="{Binding ElementName=DataGrid}"
@@ -246,8 +257,13 @@
                                     <DataGridTemplateColumn Header="Target Branch" Width="*">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <TextBox Text="{Binding TargetBranch, UpdateSourceTrigger=PropertyChanged}" Margin="5,0,5,0" Height="20"
-                                                         ToolTip="{Binding TargetBranch}"/>
+                                                <xctk:RichTextBox Margin="5,0,5,0" Height="20" ToolTip="{Binding TargetBranch}"
+                                                                  Text="{Binding TargetBranch, UpdateSourceTrigger=PropertyChanged,
+                                                                      Converter={StaticResource HighlightedTextConverter}, ConverterParameter=TargetBranch}">
+                                                    <xctk:RichTextBox.TextFormatter>
+                                                        <xctk:XamlFormatter />
+                                                    </xctk:RichTextBox.TextFormatter>
+                                                </xctk:RichTextBox>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
@@ -261,8 +277,13 @@
                                                         <ColumnDefinition Width="Auto"/>
                                                     </Grid.ColumnDefinitions>
 
-                                                    <TextBox Text="{Binding Changeset, UpdateSourceTrigger=PropertyChanged}" Margin="5,0,0,0" Height="20"
-                                                             ToolTip="{Binding Changeset}"/>
+                                                    <xctk:RichTextBox Grid.Column="0" Margin="5,0,0,0" Height="20" ToolTip="{Binding Changeset}"
+                                                                      Text="{Binding Changeset, UpdateSourceTrigger=PropertyChanged,
+                                                                      Converter={StaticResource HighlightedTextConverter}, ConverterParameter=Changeset}">
+                                                        <xctk:RichTextBox.TextFormatter>
+                                                            <xctk:XamlFormatter />
+                                                        </xctk:RichTextBox.TextFormatter>
+                                                    </xctk:RichTextBox>
                                                     <Button Grid.Column="1" Width="20" Margin="0,0,5,0" Height="20" HorizontalAlignment="Right" Content="◥"
                                                             Command="{Binding DataContext.Commands.OpenChangesetCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                             CommandParameter="{Binding ElementName=DataGrid}"

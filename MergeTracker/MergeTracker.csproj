@@ -10,6 +10,8 @@
 
   <ItemGroup>
     <PackageReference Include="CalcBinding" Version="2.5.2" />
+    <PackageReference Include="Extended.Wpf.Toolkit" Version="3.8.2" />
+    <PackageReference Include="HtmlToXamlConverter" Version="1.0.5727.24510" />
     <PackageReference Include="LiteDB" Version="5.0.9" />
     <PackageReference Include="MvvmLightLibs" Version="5.3.0" />
     <PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="16.172.0-preview" />

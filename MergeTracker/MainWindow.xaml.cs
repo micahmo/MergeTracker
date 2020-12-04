@@ -11,6 +11,7 @@ using System.Windows.Threading;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using LiteDB;
+using MergeTracker.DataConverters;
 
 namespace MergeTracker
 {
@@ -39,6 +40,9 @@ namespace MergeTracker
             Model.Commands.ReloadMergeItemsCommand.Execute(null);
 
             MergeItem.MergeItemDeleted += MergeItem_MergeItemDeleted;
+
+            // Set the HighlightedTextConverter's dependency so that it can retrieve the important text from the current configuration
+            HighlightedTextConverter.TextData = Model.RootConfiguration;
 
             Timer autoSaveTimer = new Timer { Interval = TimeSpan.FromMinutes(1).TotalMilliseconds };
             autoSaveTimer.Elapsed += AutoSaveTimer_Elapsed;

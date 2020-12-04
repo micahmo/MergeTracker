@@ -8,7 +8,7 @@ using LiteDB;
 
 namespace MergeTracker
 {
-    public class RootConfiguration : ObservableObject
+    public class RootConfiguration : ObservableObject, ITextData
     {
         public RootConfiguration()
         {
@@ -155,5 +155,18 @@ namespace MergeTracker
             Instance.MergeItems.ToList().ForEach(i => i.Save());
             DatabaseEngine.RootConfigurationCollection.Update(this);
         }
+
+        #region ITextData members
+
+        /// <inheritdoc/>
+        public string GetTextData(string key) => key switch
+        {
+            nameof(MergeTarget.BugNumber) => BugNumberFilter,
+            nameof(MergeTarget.Changeset) => ChangesetNumberFilter,
+            nameof(MergeTarget.TargetBranch) => TargetBranchFilter,
+            _ => string.Empty
+        };
+
+        #endregion
     }
 }
