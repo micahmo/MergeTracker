@@ -38,21 +38,21 @@ namespace MergeTracker
 
         public string BugNumberFilter
         {
-            get => _bugNumberFilter;
+            get => _bugNumberFilter?.Trim();
             set => Set(nameof(BugNumberFilter), ref _bugNumberFilter, value);
         }
         private string _bugNumberFilter;
 
         public string ChangesetNumberFilter
         {
-            get => _changesetNumberFilter;
+            get => _changesetNumberFilter?.Trim();
             set => Set(nameof(ChangesetNumberFilter), ref _changesetNumberFilter, value);
         }
         private string _changesetNumberFilter;
 
         public string TargetBranchFilter
         {
-            get => _targetBranchFilter;
+            get => _targetBranchFilter?.Trim();
             set => Set(nameof(TargetBranchFilter), ref _targetBranchFilter, value);
         }
         private string _targetBranchFilter;
