@@ -297,7 +297,7 @@
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBox Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" Margin="5"
-                                                         TextWrapping="Wrap"
+                                                         TextWrapping="Wrap" AcceptsReturn="True"
                                                          ToolTip="{Binding Notes}"/>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
