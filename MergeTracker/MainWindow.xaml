@@ -242,7 +242,8 @@
 
                                                     <xctk:RichTextBox Grid.Column="0" Margin="5,0,0,0" Height="20" ToolTip="{Binding BugNumber}"
                                                                       Text="{Binding BugNumber, UpdateSourceTrigger=PropertyChanged,
-                                                                      Converter={StaticResource HighlightedTextConverter}, ConverterParameter=BugNumber}">
+                                                                      Converter={StaticResource HighlightedTextConverter}, ConverterParameter=BugNumber}"
+                                                                      AcceptsReturn="False">
                                                         <xctk:RichTextBox.TextFormatter>
                                                             <xctk:XamlFormatter />
                                                         </xctk:RichTextBox.TextFormatter>
@@ -265,7 +266,8 @@
                                             <DataTemplate>
                                                 <xctk:RichTextBox Margin="5,0,5,0" Height="20" ToolTip="{Binding TargetBranch}"
                                                                   Text="{Binding TargetBranch, UpdateSourceTrigger=PropertyChanged,
-                                                                      Converter={StaticResource HighlightedTextConverter}, ConverterParameter=TargetBranch}">
+                                                                  Converter={StaticResource HighlightedTextConverter}, ConverterParameter=TargetBranch}"
+                                                                  AcceptsReturn="False">
                                                     <xctk:RichTextBox.TextFormatter>
                                                         <xctk:XamlFormatter />
                                                     </xctk:RichTextBox.TextFormatter>
@@ -285,7 +287,8 @@
 
                                                     <xctk:RichTextBox Grid.Column="0" Margin="5,0,0,0" Height="20" ToolTip="{Binding Changeset}"
                                                                       Text="{Binding Changeset, UpdateSourceTrigger=PropertyChanged,
-                                                                      Converter={StaticResource HighlightedTextConverter}, ConverterParameter=Changeset}">
+                                                                      Converter={StaticResource HighlightedTextConverter}, ConverterParameter=Changeset}"
+                                                                      AcceptsReturn="False">
                                                         <xctk:RichTextBox.TextFormatter>
                                                             <xctk:XamlFormatter />
                                                         </xctk:RichTextBox.TextFormatter>
