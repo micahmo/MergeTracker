@@ -116,242 +116,270 @@
             <TextBox Grid.Column="1" Text="{Binding RootConfiguration.DelimitedSourceControlServers}" ToolTip="{Binding RootConfiguration.DelimitedSourceControlServers}" Margin="5" Padding="5"/>
         </Grid>
 
-        <ScrollViewer Grid.Row="4" VerticalScrollBarVisibility="Auto" Margin="0,5,0,0">
-            <ItemsControl ItemsSource="{Binding RootConfiguration.MergeItems}" Margin="5" IsTabStop="False">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <local:MergeItemGrid>
-                            <local:MergeItemGrid.Resources>
-                                <ContextMenu x:Key="MergeTargetContextMenu" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
-                                    <MenuItem Header="Work Item Server" IsCheckable="False" ItemsSource="{Binding WorkItemServers}" IsEnabled="{c:Binding 'WorkItemServer != null'}">
-                                        <MenuItem.ItemContainerStyle>
-                                            <Style TargetType="MenuItem">
-                                                <Setter Property="IsChecked" Value="{Binding IsSelected}"/>
-                                                <Setter Property="Command" Value="{Binding Command}"/>
-                                            </Style>
-                                        </MenuItem.ItemContainerStyle>
-                                    </MenuItem>
-                                    <MenuItem Header="Source Control Server" IsCheckable="False" ItemsSource="{Binding SourceControlServers}" IsEnabled="{c:Binding 'SourceControlServer != null'}">
-                                        <MenuItem.ItemContainerStyle>
-                                            <Style TargetType="MenuItem">
-                                                <Setter Property="IsChecked" Value="{Binding IsSelected}"/>
-                                                <Setter Property="Command" Value="{Binding Command}"/>
-                                            </Style>
-                                        </MenuItem.ItemContainerStyle>
-                                    </MenuItem>
-                                </ContextMenu>
-                                <Style x:Key="MergeTargetRowStyle" TargetType="{x:Type DataGridRow}">
-                                    <Setter Property="ContextMenu" Value="{StaticResource MergeTargetContextMenu}" />
-                                </Style>
-                            </local:MergeItemGrid.Resources>
+        <ItemsControl Grid.Row="4" Margin="0,5,0,0" ItemsSource="{Binding RootConfiguration.MergeItems}" IsTabStop="False"
+                      VirtualizingPanel.ScrollUnit="Pixel">
+            <!--
+                The ItemsPanel and Template come from https://stackoverflow.com/a/2784220/4206279 
+                Using a VirtualizingStackPanel causes by-item scrolling, hence the need for ScrollUnit="Pixel" property.
+                Together, these changes allow fairly smooth scrolling with MUCH faster load times due to virtualization
+            -->
 
-                            <local:MergeItemGrid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </local:MergeItemGrid.ColumnDefinitions>
+            <!-- The Panel control that holds the items should support virtualization -->
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel IsVirtualizing="True"
+                                            VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
 
-                            <local:MergeItemGrid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition/>
-                                <RowDefinition Height="20"/>
-                                <RowDefinition Height="15"/>
-                                <RowDefinition Height="20"/>
-                            </local:MergeItemGrid.RowDefinitions>
+            <!-- The template should be a ScrollViewer -->
+            <ItemsControl.Template>
+                <ControlTemplate TargetType="ItemsControl">
+                    <Border BorderThickness="{TemplateBinding BorderThickness}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            Background="{TemplateBinding Background}">
+                        <ScrollViewer CanContentScroll="True" 
+                                      Padding="{TemplateBinding Padding}"
+                                      Focusable="False">
+                            <ItemsPresenter />
+                        </ScrollViewer>
+                    </Border>
+                </ControlTemplate>
+            </ItemsControl.Template>
 
-                            <TextBox Grid.Column="0" Grid.Row="0" Margin="5" Padding="5" Text="{Binding Name}" FontWeight="Medium"
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <local:MergeItemGrid>
+                        <local:MergeItemGrid.Resources>
+                            <ContextMenu x:Key="MergeTargetContextMenu" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
+                                <MenuItem Header="Work Item Server" IsCheckable="False" ItemsSource="{Binding WorkItemServers}" IsEnabled="{c:Binding 'WorkItemServer != null'}">
+                                    <MenuItem.ItemContainerStyle>
+                                        <Style TargetType="MenuItem">
+                                            <Setter Property="IsChecked" Value="{Binding IsSelected}"/>
+                                            <Setter Property="Command" Value="{Binding Command}"/>
+                                        </Style>
+                                    </MenuItem.ItemContainerStyle>
+                                </MenuItem>
+                                <MenuItem Header="Source Control Server" IsCheckable="False" ItemsSource="{Binding SourceControlServers}" IsEnabled="{c:Binding 'SourceControlServer != null'}">
+                                    <MenuItem.ItemContainerStyle>
+                                        <Style TargetType="MenuItem">
+                                            <Setter Property="IsChecked" Value="{Binding IsSelected}"/>
+                                            <Setter Property="Command" Value="{Binding Command}"/>
+                                        </Style>
+                                    </MenuItem.ItemContainerStyle>
+                                </MenuItem>
+                            </ContextMenu>
+                            <Style x:Key="MergeTargetRowStyle" TargetType="{x:Type DataGridRow}">
+                                <Setter Property="ContextMenu" Value="{StaticResource MergeTargetContextMenu}" />
+                            </Style>
+                        </local:MergeItemGrid.Resources>
+
+                        <local:MergeItemGrid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </local:MergeItemGrid.ColumnDefinitions>
+
+                        <local:MergeItemGrid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="15"/>
+                            <RowDefinition Height="20"/>
+                        </local:MergeItemGrid.RowDefinitions>
+
+                        <TextBox Grid.Column="0" Grid.Row="0" Margin="5" Padding="5" Text="{Binding Name}" FontWeight="Medium"
                                      ToolTip="{Binding Name}"/>
 
-                            <TextBlock Grid.Column="1" Grid.Row="0" Margin="5" Padding="5" Text="!!" FontSize="15"
+                        <TextBlock Grid.Column="1" Grid.Row="0" Margin="5" Padding="5" Text="!!" FontSize="15"
                                        ToolTip="{Binding LastError}" Visibility="{c:Binding HasLastError, FalseToVisibility=Collapsed}"/>
 
-                            <Button Grid.Column="3" Grid.Row="0" Margin="5" Padding="5,0,5,0" Content="New Merge Target"
+                        <Button Grid.Column="3" Grid.Row="0" Margin="5" Padding="5,0,5,0" Content="New Merge Target"
                                     Command="{Binding Commands.CreateMergeTargetCommand}"/>
 
-                            <Button Grid.Column="4" Grid.Row="0" Margin="5" Padding="5,0,5,0" Content="Delete"
+                        <Button Grid.Column="4" Grid.Row="0" Margin="5" Padding="5,0,5,0" Content="Delete"
                                     Command="{Binding Commands.DeleteCommand}"/>
 
-                            <local:MyDataGrid x:Name="DataGrid" Grid.Column="0" Grid.ColumnSpan="5" Grid.Row="1" Margin="5" ItemsSource="{Binding MergeTargets}" AutoGenerateColumns="False"
+                        <local:MyDataGrid x:Name="DataGrid" Grid.Column="0" Grid.ColumnSpan="5" Grid.Row="1" Margin="5" ItemsSource="{Binding MergeTargets}" AutoGenerateColumns="False"
                                         GridLinesVisibility="None" HeadersVisibility="Column" BorderThickness="0" CanUserAddRows="False"
                                         RowStyle="{StaticResource MergeTargetRowStyle}">
-                                <i:Interaction.Behaviors>
-                                    <local:IgnoreMouseWheelBehavior/>
-                                </i:Interaction.Behaviors>
+                            <i:Interaction.Behaviors>
+                                <local:IgnoreMouseWheelBehavior/>
+                            </i:Interaction.Behaviors>
 
-                                <DataGrid.Resources>
-                                    <Style BasedOn="{StaticResource {x:Type DataGridColumnHeader}}" TargetType="{x:Type DataGridColumnHeader}">
-                                        <Setter Property="Background" Value="Transparent" />
-                                        <Setter Property="Margin" Value="5" />
-                                    </Style>
+                            <DataGrid.Resources>
+                                <Style BasedOn="{StaticResource {x:Type DataGridColumnHeader}}" TargetType="{x:Type DataGridColumnHeader}">
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="Margin" Value="5" />
+                                </Style>
 
-                                    <Style TargetType="{x:Type DataGridCell}">
-                                        <Setter Property="IsTabStop" Value="False"/>
-                                        <Style.Triggers>
-                                            <Trigger Property="IsSelected" Value="True">
-                                                <Setter Property="Background" Value="{x:Null}" />
-                                                <Setter Property="BorderBrush" Value="{x:Null}" />
-                                            </Trigger>
+                                <Style TargetType="{x:Type DataGridCell}">
+                                    <Setter Property="IsTabStop" Value="False"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Background" Value="{x:Null}" />
+                                            <Setter Property="BorderBrush" Value="{x:Null}" />
+                                        </Trigger>
 
-                                            <DataTrigger Binding="{Binding IsCompleted}" Value="True" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
-                                                <Setter Property="Background" Value="LightGreen" />
-                                                <Setter Property="BorderBrush" Value="LightGreen" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding IsCompleted}" Value="{x:Null}" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
-                                                <Setter Property="Background" Value="LemonChiffon" />
-                                                <Setter Property="BorderBrush" Value="LemonChiffon" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding IsCompleted}" Value="False" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
-                                                <Setter Property="Background" Value="Pink" />
-                                                <Setter Property="BorderBrush" Value="Pink" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
+                                        <DataTrigger Binding="{Binding IsCompleted}" Value="True" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
+                                            <Setter Property="Background" Value="LightGreen" />
+                                            <Setter Property="BorderBrush" Value="LightGreen" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsCompleted}" Value="{x:Null}" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
+                                            <Setter Property="Background" Value="LemonChiffon" />
+                                            <Setter Property="BorderBrush" Value="LemonChiffon" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsCompleted}" Value="False" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
+                                            <Setter Property="Background" Value="Pink" />
+                                            <Setter Property="BorderBrush" Value="Pink" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
 
-                                </DataGrid.Resources>
+                            </DataGrid.Resources>
 
-                                <DataGrid.Columns>
+                            <DataGrid.Columns>
 
-                                    <DataGridTemplateColumn Header="Completed" Width="Auto" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <CheckBox IsChecked="{Binding IsCompleted, UpdateSourceTrigger=PropertyChanged}" Margin="5" Height="20" HorizontalAlignment="Center"
+                                <DataGridTemplateColumn Header="Completed" Width="Auto" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <CheckBox IsChecked="{Binding IsCompleted, UpdateSourceTrigger=PropertyChanged}" Margin="5" Height="20" HorizontalAlignment="Center"
                                                           IsThreeState="True"/>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
 
-                                    <DataGridTemplateColumn Header="Original" Width="Auto" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <RadioButton IsChecked="{Binding IsOriginal, UpdateSourceTrigger=PropertyChanged}" Margin="5" Height="20" HorizontalAlignment="Center"/>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Original" Width="Auto" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <RadioButton IsChecked="{Binding IsOriginal, UpdateSourceTrigger=PropertyChanged}" Margin="5" Height="20" HorizontalAlignment="Center"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
 
-                                    <DataGridTemplateColumn Header="Work Item Number" Width="*" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                    </Grid.ColumnDefinitions>
+                                <DataGridTemplateColumn Header="Work Item Number" Width="*" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
 
-                                                    <xctk:RichTextBox Grid.Column="0" Margin="5,0,0,0" Height="20" ToolTip="{Binding BugNumber}"
+                                                <xctk:RichTextBox Grid.Column="0" Margin="5,0,0,0" Height="20" ToolTip="{Binding BugNumber}"
                                                                       Text="{Binding BugNumber, UpdateSourceTrigger=PropertyChanged,
                                                                       Converter={StaticResource HighlightedTextConverter}, ConverterParameter=BugNumber}"
                                                                       AcceptsReturn="False">
-                                                        <xctk:RichTextBox.TextFormatter>
-                                                            <xctk:XamlFormatter />
-                                                        </xctk:RichTextBox.TextFormatter>
-                                                    </xctk:RichTextBox>
-                                                    <Button Grid.Column="1" Width="20" Height="20" HorizontalAlignment="Right" Content="❐"
-                                                            Command="{Binding DataContext.Commands.CopyBugNumberCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                            CommandParameter="{Binding ElementName=DataGrid}"
-                                                            ToolTip="Copy work item number to clipboard"/>
-                                                    <Button Grid.Column="2" Width="20" Margin="0,0,5,0" Height="20" HorizontalAlignment="Right" Content="◥"
-                                                            Command="{Binding DataContext.Commands.OpenBugCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                            CommandParameter="{Binding ElementName=DataGrid}"
-                                                            ToolTip="Open work item in TFS web"/>
-                                                </Grid>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-
-                                    <DataGridTemplateColumn Header="Target Branch" Width="*" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <xctk:RichTextBox Margin="5,0,5,0" Height="20" ToolTip="{Binding TargetBranch}"
-                                                                  Text="{Binding TargetBranch, UpdateSourceTrigger=PropertyChanged,
-                                                                  Converter={StaticResource HighlightedTextConverter}, ConverterParameter=TargetBranch}"
-                                                                  AcceptsReturn="False">
                                                     <xctk:RichTextBox.TextFormatter>
                                                         <xctk:XamlFormatter />
                                                     </xctk:RichTextBox.TextFormatter>
                                                 </xctk:RichTextBox>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
+                                                <Button Grid.Column="1" Width="20" Height="20" HorizontalAlignment="Right" Content="❐"
+                                                            Command="{Binding DataContext.Commands.CopyBugNumberCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                            CommandParameter="{Binding ElementName=DataGrid}"
+                                                            ToolTip="Copy work item number to clipboard"/>
+                                                <Button Grid.Column="2" Width="20" Margin="0,0,5,0" Height="20" HorizontalAlignment="Right" Content="◥"
+                                                            Command="{Binding DataContext.Commands.OpenBugCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                            CommandParameter="{Binding ElementName=DataGrid}"
+                                                            ToolTip="Open work item in TFS web"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
 
-                                    <DataGridTemplateColumn Header="Changeset(s)" Width="*" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                    </Grid.ColumnDefinitions>
+                                <DataGridTemplateColumn Header="Target Branch" Width="*" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <xctk:RichTextBox Margin="5,0,5,0" Height="20" ToolTip="{Binding TargetBranch}"
+                                                                  Text="{Binding TargetBranch, UpdateSourceTrigger=PropertyChanged,
+                                                                  Converter={StaticResource HighlightedTextConverter}, ConverterParameter=TargetBranch}"
+                                                                  AcceptsReturn="False">
+                                                <xctk:RichTextBox.TextFormatter>
+                                                    <xctk:XamlFormatter />
+                                                </xctk:RichTextBox.TextFormatter>
+                                            </xctk:RichTextBox>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
 
-                                                    <xctk:RichTextBox Grid.Column="0" Margin="5,0,0,0" Height="20" ToolTip="{Binding Changeset}"
+                                <DataGridTemplateColumn Header="Changeset(s)" Width="*" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <xctk:RichTextBox Grid.Column="0" Margin="5,0,0,0" Height="20" ToolTip="{Binding Changeset}"
                                                                       Text="{Binding Changeset, UpdateSourceTrigger=PropertyChanged,
                                                                       Converter={StaticResource HighlightedTextConverter}, ConverterParameter=Changeset}"
                                                                       AcceptsReturn="False">
-                                                        <xctk:RichTextBox.TextFormatter>
-                                                            <xctk:XamlFormatter />
-                                                        </xctk:RichTextBox.TextFormatter>
-                                                    </xctk:RichTextBox>
-                                                    <Button Grid.Column="1" Width="20" Margin="0,0,5,0" Height="20" HorizontalAlignment="Right" Content="◥"
+                                                    <xctk:RichTextBox.TextFormatter>
+                                                        <xctk:XamlFormatter />
+                                                    </xctk:RichTextBox.TextFormatter>
+                                                </xctk:RichTextBox>
+                                                <Button Grid.Column="1" Width="20" Margin="0,0,5,0" Height="20" HorizontalAlignment="Right" Content="◥"
                                                             Command="{Binding DataContext.Commands.OpenChangesetCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                             CommandParameter="{Binding ElementName=DataGrid}"
                                                             ToolTip="Open changeset(s) in TFS web"/>
-                                                </Grid>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
 
-                                    <DataGridTemplateColumn Header="Notes" Width="*" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBox Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" Margin="5"
+                                <DataGridTemplateColumn Header="Notes" Width="*" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBox Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" Margin="5"
                                                          TextWrapping="Wrap" AcceptsReturn="True"
                                                          ToolTip="{Binding Notes}"/>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
 
-                                    <DataGridTemplateColumn Header="Generate Check-in Message" Width="Auto">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <Button Content="Generate Check-in Message" Margin="5,0,5,0" Height="20" Padding="5,0,5,0"
+                                <DataGridTemplateColumn Header="Generate Check-in Message" Width="Auto">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="Generate Check-in Message" Margin="5,0,5,0" Height="20" Padding="5,0,5,0"
                                                         Command="{Binding DataContext.Commands.GenerateMessageCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                         CommandParameter="{Binding ElementName=DataGrid}"
                                                         ToolTip="Generates a check-in message containing the original work item number and branch info and the target branch.&#x0a;Copies the message to the clipboard."/>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
 
-                                    <DataGridTemplateColumn Header="Delete" Width="Auto">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <Button Content="Delete" Margin="5,0,5,0" Height="20" Padding="5,0,5,0"
+                                <DataGridTemplateColumn Header="Delete" Width="Auto">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="Delete" Margin="5,0,5,0" Height="20" Padding="5,0,5,0"
                                                         Command="{Binding DataContext.Commands.DeleteMergeTargetCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                         CommandParameter="{Binding ElementName=DataGrid}"/>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
 
-                                    <DataGridTemplateColumn Header="Menu" Width="Auto">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <Button Content="▼" Margin="5,0,5,0" Height="20" Padding="5,0,5,0"
+                                <DataGridTemplateColumn Header="Menu" Width="Auto">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="▼" Margin="5,0,5,0" Height="20" Padding="5,0,5,0"
                                                         Command="{Binding DataContext.Commands.ShowMergeTargetContextMenuCommand, RelativeSource={RelativeSource AncestorType=local:MainWindow}}"
                                                         CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}}"/>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
 
-                                </DataGrid.Columns>
-                            </local:MyDataGrid>
+                            </DataGrid.Columns>
+                        </local:MyDataGrid>
 
-                            <Canvas Grid.Column="0" Grid.ColumnSpan="5" Grid.Row="3" Background="LightGray" Margin="5"/>
-                        </local:MergeItemGrid>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
+                        <Canvas Grid.Column="0" Grid.ColumnSpan="5" Grid.Row="3" Background="LightGray" Margin="5"/>
+                    </local:MergeItemGrid>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
 
         <GridSplitter Grid.Row="4" VerticalAlignment="Top" HorizontalAlignment="Stretch" Background="DarkGray" Height="5" IsEnabled="False" />
     </Grid>
