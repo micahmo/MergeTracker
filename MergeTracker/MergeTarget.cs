@@ -44,7 +44,7 @@ namespace MergeTracker
             get => _isCompleted;
             set => Set(nameof(IsCompleted), ref _isCompleted, value);
         }
-        private bool? _isCompleted;
+        private bool? _isCompleted = false;
 
         public string Notes
         {
