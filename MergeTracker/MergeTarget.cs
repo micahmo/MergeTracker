@@ -39,12 +39,17 @@ namespace MergeTracker
         }
         private bool _isOriginal;
 
+        // A note about this nullable value.
+        // LiteDB only assigns the value during serialization if it is non-null in the DB.
+        // Originally, the _isCompleted field was set to false for the sake of new instances of MergeTarget,
+        // but then it stayed false during deserialization if the incoming value was null.
+        // Going forward, new instances of MergeTarget should manually set IsCompleted to the preferred default value (probably false).
         public bool? IsCompleted
         {
             get => _isCompleted;
             set => Set(nameof(IsCompleted), ref _isCompleted, value);
         }
-        private bool? _isCompleted = false;
+        private bool? _isCompleted;
 
         public string Notes
         {

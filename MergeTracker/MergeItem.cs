@@ -169,7 +169,7 @@ namespace MergeTracker
 
         private void CreateMergeTarget()
         {
-            MergeTarget mergeTarget = new MergeTarget();
+            MergeTarget mergeTarget = new MergeTarget {IsCompleted = false};
             DatabaseEngine.MergeTargetCollection.Insert(mergeTarget);
             Model.MergeTargets.Add(mergeTarget);
         }

@@ -132,7 +132,7 @@ namespace MergeTracker
             MergeItem mergeItem = new MergeItem {Name = "New Merge Item"};
             DatabaseEngine.MergeItemCollection.Insert(mergeItem);
 
-            MergeTarget mergeTarget = new MergeTarget {IsOriginal = true};
+            MergeTarget mergeTarget = new MergeTarget {IsOriginal = true, IsCompleted = false};
             DatabaseEngine.MergeTargetCollection.Insert(mergeTarget);
 
             mergeItem.MergeTargets.Add(mergeTarget);
