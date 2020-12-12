@@ -28,6 +28,25 @@ namespace MergeTracker
             return clean;
         }
 
+        /// <summary>
+        /// Adds a clause to a query string. If the query is empty or null, the given <paramref name="clause"/> is returned.
+        /// Otherwise, the given <paramref name="query"/> is returned, suffixed by the <paramref name="operator"/> and <paramref name="clause"/>.
+        /// Example:
+        ///   <code>Given query = "", operator = "OR", clause = "ID = 5", returns "ID = 5"</code>
+        ///   <code>Given query = "Name = 'test'", operator = "OR", clause = "ID = 5", returns "Name = 'test' OR ID = 5"</code>
+        /// </summary>
+        public static string AddClause(this string query, string @operator, string clause)
+        {
+            if (string.IsNullOrEmpty(query) == false)
+            {
+                query = $"{query} {@operator} ";
+            }
+
+            query = $"{query}{clause}";
+
+            return query;
+        }
+
         #endregion
     }
 }

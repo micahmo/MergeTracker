@@ -63,9 +63,7 @@ namespace MergeTracker
         {
             switch (e.PropertyName)
             {
-                case nameof(RootConfiguration.BugNumberFilter):
-                case nameof(RootConfiguration.ChangesetNumberFilter):
-                case nameof(RootConfiguration.TargetBranchFilter):
+                case nameof(RootConfiguration.Filter):
                 case nameof(RootConfiguration.NotCompletedFilter):
                     Model.Commands.ReloadMergeItemsCommand.Execute(null);
                     break;
@@ -151,71 +149,72 @@ namespace MergeTracker
             // 2. This prevents us from losing any data when we clear the MergeItem list from memory.
             Model.RootConfiguration.Save();
 
-            ILiteCollection<MergeItem> mergeItemsCollection = DatabaseEngine.MergeItemCollection.Include(i => i.MergeTargets);
-            IEnumerable<MergeItem> mergeItems = null;
-            ILiteQueryable<MergeTarget> mergeTargetsQuery = null;
+            #region Notes about implementation
 
-            if (string.IsNullOrEmpty(Model.RootConfiguration.BugNumberFilter) == false)
-            {
-                mergeTargetsQuery = (mergeTargetsQuery ?? DatabaseEngine.MergeTargetCollection.Query())
-                    .Where(t => t.BugNumber.Contains(Model.RootConfiguration.BugNumberFilter));
-            }
+            // TODO: Change these queries to use C# query syntax and PredicateBuilder once issue 1897 is fixed in LiteDB.
+            // https://github.com/mbdavid/LiteDB/issues/1897
+            // For now, we have to hard-code the query syntax for all parameters.
 
-            if (string.IsNullOrEmpty(Model.RootConfiguration.ChangesetNumberFilter) == false)
-            {
-                mergeTargetsQuery = (mergeTargetsQuery ?? DatabaseEngine.MergeTargetCollection.Query())
-                    .Where(t => t.Changeset.Contains(Model.RootConfiguration.ChangesetNumberFilter));
-            }
+            // I also could not get parameterization to work without issues, so we are potentially vulnerable to parameter injection.
+            // That being said, I was not able to get an injection to work.
+            //  1. It looks like LiteDB cannot support multiple statements, so ending the query and staring a new line
+            //     (that does anything other than SELECT) doesn't seem to work.
+            //  2. We are not directly building the whole statement using interpolated strings, only the were clause.
+            //     It seems like, at worst, we'll have a poorly formed where clause, but no injection.
 
-            if (string.IsNullOrEmpty(Model.RootConfiguration.TargetBranchFilter) == false)
-            {
-                mergeTargetsQuery = (mergeTargetsQuery ?? DatabaseEngine.MergeTargetCollection.Query())
-                    .Where(t => t.TargetBranch.Contains(Model.RootConfiguration.TargetBranchFilter));
-            }
+            // Below is the ONLY way I could get everything to work with complex queries. :-)
 
+            #endregion
+
+            var mergeItemsQuery = DatabaseEngine.MergeItemCollection.Include(i => i.MergeTargets);
+            string query = null;
+            string subQuery = null;
+
+            // NotCompletedFilter has highest precedence, so it must be an AND.
             if (Model.RootConfiguration.NotCompletedFilter)
             {
-                mergeTargetsQuery = (mergeTargetsQuery ?? DatabaseEngine.MergeTargetCollection.Query())
-                    .Where(t => t.IsCompleted != true);
+                query = query.AddClause("AND", "COUNT(FILTER($.MergeTargets[*]=>@.IsCompleted!=true))>0");
             }
 
-            // We have finished filtering. See if we have any query on MergeTargets, in which case we need to apply this filter to the MergeItems.
-            if (mergeTargetsQuery is { })
+            if (string.IsNullOrEmpty(Model.RootConfiguration.Filter) == false)
             {
-                string queryString = string.Empty;
-                foreach (int matchingMergeTargetId in mergeTargetsQuery.Select(t => t.ObjectId).ToEnumerable())
-                {
-                    if (string.IsNullOrEmpty(queryString) == false)
-                    {
-                        queryString += "OR ";
-                    }
+                subQuery = subQuery.AddClause("AND", $"Name LIKE '%{Model.RootConfiguration.Filter}%'");
+            }
 
-                    queryString += $"$.MergeTargets[*].$id ANY = {matchingMergeTargetId}";
-                }
+            if (string.IsNullOrEmpty(Model.RootConfiguration.Filter) == false)
+            {
+                subQuery = subQuery.AddClause("OR", "COUNT(FILTER($.MergeTargets[*]=>" +
+                                                    $"@.BugNumber LIKE '%{Model.RootConfiguration.Filter}%' OR " +
+                                                    $"@.Changeset LIKE '%{Model.RootConfiguration.Filter}%' OR " +
+                                                    $"@.TargetBranch LIKE '%{Model.RootConfiguration.Filter}%'" +
+                                                    "))>0");
+            }
 
-                if (string.IsNullOrEmpty(queryString) == false)
-                {
-                    mergeItems = mergeItemsCollection.Find(queryString);
-                }
-                else
-                {
-                    mergeItems = Enumerable.Empty<MergeItem>();
-                }
+            if (string.IsNullOrEmpty(subQuery) == false)
+            {
+                query = query.AddClause("AND", $"({subQuery})");
             }
 
             // Use a wait cursor with a specific dispatcher priority, so that we can ensure that it doesn't change until the UI is responsive
             using (new WaitCursor(Cursors.Wait, DispatcherPriority.Loaded))
             {
                 Model.RootConfiguration.MergeItems.Clear();
-                (mergeItems ?? mergeItemsCollection.FindAll()).OrderByDescending(i => i.ObjectId).ToList().ForEach(i => Model.RootConfiguration.MergeItems.Add(i));
+
+                try
+                {
+                    mergeItemsQuery.Find(query ?? "1=1").OrderByDescending(i => i.ObjectId).ToList().ForEach(i => Model.RootConfiguration.MergeItems.Add(i));
+                }
+                catch (LiteException)
+                {
+                    // Exceptions would be caused by poorly formed where clauses, so we'll just let it go with no results
+                    // (We've already cleared the in-memory list.)
+                }
             }
         }
 
         private void ClearFilters()
         {
-            Model.RootConfiguration.BugNumberFilter = string.Empty;
-            Model.RootConfiguration.ChangesetNumberFilter = string.Empty;
-            Model.RootConfiguration.TargetBranchFilter = string.Empty;
+            Model.RootConfiguration.Filter = string.Empty;
             Model.RootConfiguration.NotCompletedFilter = false;
         }
 

@@ -13,9 +13,20 @@ namespace MergeTracker.DataConverters
         /// <inheritdoc/>
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is { } && parameter is string key)
+            // Note: Because we're bound to a RichTextBox, we need to have the XAML formatting (even if the string is empty).
+            // Therefore, the only time we don't want go go through the formatting branch is if value is null.
+            // Do not add any other top-level conditions.
+
+            if (value is { })
             {
-                value = HtmlToXamlConverter.ConvertHtmlToXaml(Regex.Replace(value.ToString(), $"({TextData.GetTextData(key)})", "<b>$1</b>"), asFlowDocument: false);
+                if (TextData.GetTextData(parameter?.ToString()) is { } match && string.IsNullOrEmpty(match) == false)
+                {
+                    value = HtmlToXamlConverter.ConvertHtmlToXaml(Regex.Replace(value.ToString(), $"({TextData.GetTextData(parameter?.ToString())})", "<b>$1</b>", RegexOptions.IgnoreCase), asFlowDocument: false);
+                }
+                else
+                {
+                    value = HtmlToXamlConverter.ConvertHtmlToXaml(value.ToString(), asFlowDocument: false);
+                }
             }
 
             return value;
