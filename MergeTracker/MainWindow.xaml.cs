@@ -90,14 +90,38 @@ namespace MergeTracker
         }
 
         // Fired when the user presses a key in one of the "item" TextBoxes, such as Work Item or Changeset
-        private async void RichTextBox_KeyDown(object sender, KeyEventArgs e)
+        // Use PreviewKeyDown because some keys get filtered out due to funky logic in the base OnKeyDown handler.
+        private async void DataGrid_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            // Control-Enter will allow the user to quickly open an item
             if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.Control)
             {
-                // Control-Enter will invoke the special Open command on the bound object
-                if (sender is Xctk.RichTextBox textBox && textBox.DataContext is MergeTarget mergeTarget && int.TryParse(mergeTarget.BugNumber, out int bugNumber))
+                // Find our sender DataGrid, with its bound MergeItem
+                // and our sender RichTextBox with its bound MergeTarget
+                if (sender is DataGrid dataGrid && dataGrid.DataContext is MergeItem mergeItem &&
+                    e.OriginalSource is Xctk.RichTextBox textBox && textBox.DataContext is MergeTarget mergeTarget)
                 {
-                    await TfsUtils.OpenWorkItem(mergeTarget.WorkItemServer, bugNumber);
+                    // Now find out which one
+                    var bindingExpression = textBox.GetBindingExpression(Xctk.RichTextBox.TextProperty);
+                    string bindingPath = bindingExpression?.ParentBinding.Path.Path;
+                    
+                    switch (bindingPath)
+                    {
+                        case nameof(MergeTarget.BugNumber):
+                            if (int.TryParse(mergeTarget.BugNumber, out int bugNumber))
+                            {
+                                await mergeItem.OpenBug(mergeTarget.WorkItemServer, bugNumber);
+                            }
+                            break;
+                        case nameof(mergeTarget.Changeset):
+                            if (string.IsNullOrEmpty(mergeTarget.Changeset) == false)
+                            {
+                                await mergeItem.OpenChangeset(mergeTarget.SourceControlServer, mergeTarget.Changeset);
+                            }
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         }

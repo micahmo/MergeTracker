@@ -206,7 +206,8 @@
 
                             <local:MyDataGrid x:Name="DataGrid" Grid.Column="0" Grid.ColumnSpan="5" Grid.Row="1" Margin="5" ItemsSource="{Binding MergeTargets}" AutoGenerateColumns="False"
                                         GridLinesVisibility="None" HeadersVisibility="Column" BorderThickness="0" CanUserAddRows="False"
-                                        RowStyle="{StaticResource MergeTargetRowStyle}">
+                                        RowStyle="{StaticResource MergeTargetRowStyle}"
+                                        PreviewKeyDown="DataGrid_PreviewKeyDown">
                                 <i:Interaction.Behaviors>
                                     <local:IgnoreMouseWheelBehavior/>
                                 </i:Interaction.Behaviors>
@@ -274,8 +275,7 @@
                                                     <xctk:RichTextBox Grid.Column="0" Margin="5,0,0,0" Height="20" ToolTip="{Binding BugNumber}"
                                                                       Text="{Binding BugNumber, UpdateSourceTrigger=PropertyChanged,
                                                                       Converter={StaticResource HighlightedTextConverter}, ConverterParameter=BugNumber}"
-                                                                      AcceptsReturn="False"
-                                                                      KeyDown="RichTextBox_KeyDown">
+                                                                      AcceptsReturn="False">
                                                         <xctk:RichTextBox.TextFormatter>
                                                             <xctk:XamlFormatter />
                                                         </xctk:RichTextBox.TextFormatter>
@@ -287,7 +287,7 @@
                                                     <Button Grid.Column="2" Width="20" Margin="0,0,5,0" Height="20" HorizontalAlignment="Right" Content="◥"
                                                             Command="{Binding DataContext.Commands.OpenBugCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                             CommandParameter="{Binding ElementName=DataGrid}"
-                                                            ToolTip="Open work item in TFS web"/>
+                                                            ToolTip="Open work item in TFS web (Ctrl-Enter)"/>
                                                 </Grid>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
@@ -328,7 +328,7 @@
                                                     <Button Grid.Column="1" Width="20" Margin="0,0,5,0" Height="20" HorizontalAlignment="Right" Content="◥"
                                                             Command="{Binding DataContext.Commands.OpenChangesetCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                             CommandParameter="{Binding ElementName=DataGrid}"
-                                                            ToolTip="Open changeset(s) in TFS web"/>
+                                                            ToolTip="Open changeset(s) in TFS web (Ctrl-Enter)"/>
                                                 </Grid>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>

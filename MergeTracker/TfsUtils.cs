@@ -101,6 +101,28 @@ namespace MergeTracker
             });
         }
 
+        public static async Task OpenChangeset(string serverName, int changesetId)
+        {
+            if (await GetChangeset(serverName, changesetId) is TfvcChangeset changeset)
+            {
+                if (changeset.Links.Links.TryGetValue("web", out var html) && html is ReferenceLink htmlReferenceLink)
+                {
+                    Process.Start(htmlReferenceLink.Href);
+                }
+            }
+        }
+
+        public static async Task OpenCommit(string serverName, string projectName, string repositoryName, string commitId)
+        {
+            if (await GetCommit(serverName, projectName, repositoryName, commitId) is GitCommit commit)
+            {
+                if (commit.Links.Links.TryGetValue("web", out var html) && html is ReferenceLink htmlReferenceLink)
+                {
+                    Process.Start(htmlReferenceLink.Href);
+                }
+            }
+        }
+
         private static readonly HashSet<string> _failedToConnect = new HashSet<string>();
         private static readonly Dictionary<ServerClientTypePair, VssHttpClientBase> _tfsClients = new Dictionary<ServerClientTypePair, VssHttpClientBase>();
     }

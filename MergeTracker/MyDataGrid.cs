@@ -13,6 +13,8 @@ namespace MergeTracker
     {
         protected override void OnKeyDown(KeyEventArgs e)
         {
+            base.OnKeyDown(e);
+
             if (e.Key == Key.Enter && Keyboard.PrimaryDevice.ActiveSource is { })
             {
                 if (Keyboard.Modifiers == ModifierKeys.None)
@@ -22,8 +24,6 @@ namespace MergeTracker
                     {
                         RoutedEvent = Keyboard.KeyDownEvent
                     });
-
-                    e.Handled = true;
                 }
                 else if (Keyboard.Modifiers == ModifierKeys.Shift)
                 {
@@ -34,12 +34,8 @@ namespace MergeTracker
                     {
                         RoutedEvent = Keyboard.KeyDownEvent
                     };
-
-                    e.Handled = true;
                 }
             }
-
-            base.OnKeyDown(e);
         }
 
         protected override void OnKeyUp(KeyEventArgs e)
