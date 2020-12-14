@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -135,63 +134,6 @@ namespace MergeTracker
             MergeTargets.ToList().ForEach(t => t.Save());
             DatabaseEngine.MergeItemCollection.Update(this);
         }
-
-        public async Task OpenBug(string workItemServer, int bugNumber)
-        {
-            if (RootConfiguration.Instance.UseTfs)
-            {
-                Mouse.OverrideCursor = Cursors.Wait;
-
-                try
-                {
-                    await TfsUtils.OpenWorkItem(workItemServer, bugNumber);
-                }
-                catch (Exception ex)
-                {
-                    LastError = $"There was an error opening work item.\n\n{ex}";
-                }
-
-                Mouse.OverrideCursor = null;
-            }
-        }
-
-        public async Task OpenChangeset(string sourceControlServer, string changeset)
-        {
-            if (RootConfiguration.Instance.UseTfs)
-            {
-                Mouse.OverrideCursor = Cursors.Wait;
-
-                try
-                {
-                    foreach (string changesetString in changeset.Split(new[] {",", ";"}, StringSplitOptions.RemoveEmptyEntries))
-                    {
-                        // Check if it's a TFS changeset or a Git commit
-                        if (changesetString.Any(char.IsLetter))
-                        {
-                            // Git commit -- we need server name and project name
-                            if (sourceControlServer.Split(new[] {"|"}, StringSplitOptions.RemoveEmptyEntries) is { } parts && parts.Length == 3)
-                            {
-                                await TfsUtils.OpenCommit(parts[0], parts[1], parts[2], changesetString);
-                            }
-                        }
-                        else
-                        {
-                            // TFS changeset
-                            if (int.TryParse(changesetString, out int changesetId))
-                            {
-                                await TfsUtils.OpenChangeset(sourceControlServer, changesetId);
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    LastError = $"There was an error opening changeset.\n\n{ex}";
-                }
-
-                Mouse.OverrideCursor = null;
-            }
-        }
     }
 
     public class MergeItemCommands
@@ -261,7 +203,7 @@ namespace MergeTracker
         {
             if (dataGrid.SelectedItem is MergeTarget mergeTarget && int.TryParse(mergeTarget.BugNumber, out int bugNumber))
             {
-                await Model.OpenBug(mergeTarget.WorkItemServer, bugNumber);
+                await RootConfiguration.Instance.OpenBug(mergeTarget.WorkItemServer, bugNumber, Model);
             }
         }
 
@@ -269,7 +211,7 @@ namespace MergeTracker
         {
             if (dataGrid.SelectedItem is MergeTarget mergeTarget && string.IsNullOrEmpty(mergeTarget.Changeset) == false)
             {
-                await Model.OpenChangeset(mergeTarget.SourceControlServer, mergeTarget.Changeset);
+                await RootConfiguration.Instance.OpenChangeset(mergeTarget.SourceControlServer, mergeTarget.Changeset, Model);
             }
         }
 

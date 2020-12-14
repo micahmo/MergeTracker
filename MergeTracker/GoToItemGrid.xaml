@@ -1,0 +1,83 @@
+﻿<Grid x:Class="MergeTracker.GoToItemGrid"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:c="clr-namespace:CalcBinding;assembly=CalcBinding"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:local="clr-namespace:MergeTracker"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d"
+      d:DataContext="{d:DesignInstance Type=local:MainWindowModel}"
+      
+      Width="{Binding PromptForOpenItemWidth}"
+      IsEnabled="{c:Binding '!GoingToItem'}"
+      IsVisibleChanged="Grid_IsVisibleChanged">
+
+    <Grid.Resources>
+        <local:EnumConverter x:Key="EnumConverter"/>
+    </Grid.Resources>
+
+    <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="6*"/>
+    </Grid.ColumnDefinitions>
+
+    <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <TextBlock Grid.Column="0" Grid.Row="0" Text="Item ID:" Margin="5"/>
+    <TextBox x:Name="ItemIdTextBox" Grid.Column="1" Grid.Row="0" Margin="5" Height="22"
+             Text="{Binding RootConfiguration.SelectedItemId, UpdateSourceTrigger=PropertyChanged}"
+             Focusable="True" VerticalContentAlignment="Center"/>
+
+    <TextBlock Grid.Column="0" Grid.Row="1" Text="Type:" Margin="5"/>
+    <ComboBox Grid.Column="1" Grid.Row="1" Margin="5"
+              ItemsSource="{Binding ItemTypes}"
+              SelectedItem="{Binding RootConfiguration.SelectedItemType}">
+
+        <ComboBox.ItemTemplate>
+            <DataTemplate>
+                <ContentPresenter Content="{Binding Converter={StaticResource EnumConverter}}"/>
+            </DataTemplate>
+        </ComboBox.ItemTemplate>
+    </ComboBox>
+
+    <TextBlock Grid.Column="0" Grid.Row="2" Text="Server:" Margin="5"
+                               Visibility="{c:Binding 'RootConfiguration.SelectedItemType==local:ItemType.WorkItem', FalseToVisibility=Collapsed}"/>
+    <ComboBox Grid.Column="1" Grid.Row="2" Margin="5"
+                              Visibility="{c:Binding 'RootConfiguration.SelectedItemType==local:ItemType.WorkItem', FalseToVisibility=Collapsed}"
+                              ItemsSource="{Binding RootConfiguration.WorkItemServers}"
+                              SelectedItem="{Binding RootConfiguration.SelectedWorkItemServer}"
+                              ToolTip="{Binding RootConfiguration.SelectedWorkItemServer}"/>
+
+    <TextBlock Grid.Column="0" Grid.Row="2" Text="Server:" Margin="5"
+                               Visibility="{c:Binding 'RootConfiguration.SelectedItemType==local:ItemType.Changeset', FalseToVisibility=Collapsed}"/>
+    <ComboBox Grid.Column="1" Grid.Row="2" Margin="5"
+                              Visibility="{c:Binding 'RootConfiguration.SelectedItemType==local:ItemType.Changeset', FalseToVisibility=Collapsed}"
+                              ItemsSource="{Binding RootConfiguration.SourceControlServers}"
+                              SelectedItem="{Binding RootConfiguration.SelectedSourceControlServer}"
+                              ToolTip="{Binding RootConfiguration.SelectedSourceControlServer}"/>
+
+    <Grid Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock x:Name="ErrorTextBox" Text="Error opening item!" Foreground="Red" Margin="5"
+                       Visibility="{c:Binding ErrorOpeningItem, FalseToVisibility=Collapsed}"
+                       IsVisibleChanged="ErrorTextBlock_IsVisibleChanged"/>
+
+            <Button Grid.Column="2" Margin="5" Padding="5" MinWidth="50" Content="Cancel"
+                                    Command="{Binding Commands.CloseGoToItemCommand}"/>
+            <Button Grid.Column="3" Margin="5" Padding="5" MinWidth="50" Content="Go"
+                                    Command="{Binding Commands.GoToItemCommand}"/>
+        </Grid>
+    </Grid>
+</Grid>

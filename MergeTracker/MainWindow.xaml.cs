@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 using GalaSoft.MvvmLight;
@@ -24,7 +25,7 @@ namespace MergeTracker
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = Model;
+            DataContext = Model ??= new MainWindowModel(this);
 
             try
             {
@@ -71,7 +72,7 @@ namespace MergeTracker
             }
         }
 
-        private MainWindowModel Model { get; } = new MainWindowModel();
+        private MainWindowModel Model { get; }
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
@@ -87,6 +88,22 @@ namespace MergeTracker
         private void ReloadCommand_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             Model.Commands.ReloadMergeItemsCommand.Execute(null);
+        }
+
+        private void GoToItemCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            // First, check if there is any selected text. We want this to become the seed for the GoTo box
+
+            IInputElement focusedControl = FocusManager.GetFocusedElement(this);
+            var selectedTextProperty = focusedControl?.GetType().GetProperty(nameof(TextBox.SelectedText), BindingFlags.Instance | BindingFlags.Public);
+            var textValue = selectedTextProperty?.GetValue(focusedControl) as string;
+
+            if (string.IsNullOrEmpty(textValue) == false)
+            {
+                Model.RootConfiguration.SelectedItemId = textValue;
+            }
+
+            Model.Commands.ShowGoToItemCommand.Execute(null);
         }
 
         // Fired when the user presses a key in one of the "item" TextBoxes, such as Work Item or Changeset
@@ -110,13 +127,13 @@ namespace MergeTracker
                         case nameof(MergeTarget.BugNumber):
                             if (int.TryParse(mergeTarget.BugNumber, out int bugNumber))
                             {
-                                await mergeItem.OpenBug(mergeTarget.WorkItemServer, bugNumber);
+                                await Model.RootConfiguration.OpenBug(mergeTarget.WorkItemServer, bugNumber, mergeItem);
                             }
                             break;
                         case nameof(mergeTarget.Changeset):
                             if (string.IsNullOrEmpty(mergeTarget.Changeset) == false)
                             {
-                                await mergeItem.OpenChangeset(mergeTarget.SourceControlServer, mergeTarget.Changeset);
+                                await Model.RootConfiguration.OpenChangeset(mergeTarget.SourceControlServer, mergeTarget.Changeset, mergeItem);
                             }
                             break;
                         default:
@@ -125,16 +142,39 @@ namespace MergeTracker
                 }
             }
         }
+
+        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            Model.RaisePropertyChanged(nameof(Model.PromptForOpenItemWidth));
+        }
+
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (Model.ShowGoToItemPrompt)
+            {
+                if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    Model.Commands.GoToItemCommand?.Execute(null);
+                }
+                else if (e.Key == Key.Escape && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    Model.Commands.CloseGoToItemCommand?.Execute(null);
+                }
+            }
+        }
     }
 
     internal class MainWindowModel : ObservableObject
     {
-        public MainWindowModel()
+        public MainWindowModel(MainWindow mainWindow)
         {
             Commands = new MainWindowCommands(this);
+            _mainWindow = mainWindow;
         }
 
         public MainWindowCommands Commands { get; }
+
+        private readonly MainWindow _mainWindow;
 
         public RootConfiguration RootConfiguration
         {
@@ -142,6 +182,31 @@ namespace MergeTracker
             set => Set(nameof(RootConfiguration), ref _rootConfiguration, value);
         }
         private RootConfiguration _rootConfiguration;
+
+        public bool ShowGoToItemPrompt
+        {
+            get => _showGoToItemPrompt;
+            set => Set(nameof(ShowGoToItemPrompt), ref _showGoToItemPrompt, value);
+        }
+        private bool _showGoToItemPrompt;
+
+        public bool GoingToItem
+        {
+            get => _goingToItem;
+            set => Set(nameof(GoingToItem), ref _goingToItem, value);
+        }
+        private bool _goingToItem;
+
+        public double PromptForOpenItemWidth => Math.Min(_mainWindow.ActualWidth - 100, 600);
+
+        public bool ErrorOpeningItem
+        {
+            get => _errorOpeningItem;
+            set => Set(nameof(ErrorOpeningItem), ref _errorOpeningItem, value);
+        }
+        private bool _errorOpeningItem;
+
+        public IEnumerable<ItemType> ItemTypes => Enum.GetValues(typeof(ItemType)).OfType<ItemType>();
     }
 
     internal class MainWindowCommands
@@ -155,6 +220,15 @@ namespace MergeTracker
 
         public ICommand ReloadMergeItemsCommand => _reloadMergeItemsCommand ??= new RelayCommand(ReloadMergeItems);
         private RelayCommand _reloadMergeItemsCommand;
+
+        public ICommand ShowGoToItemCommand => _showGoToItemCommand ??= new RelayCommand(ShowGoToItem);
+        private RelayCommand _showGoToItemCommand;
+
+        public ICommand GoToItemCommand => _goToItemCommand ??= new RelayCommand(GoToItem);
+        private RelayCommand _goToItemCommand;
+
+        public ICommand CloseGoToItemCommand => _closeGoToItemCommand ??= new RelayCommand(CloseGoToItem);
+        private RelayCommand _closeGoToItemCommand;
 
         public ICommand ClearFiltersCommand => _clearFiltersCommand ??= new RelayCommand(ClearFilters);
         private RelayCommand _clearFiltersCommand;
@@ -248,6 +322,57 @@ namespace MergeTracker
                     // (We've already cleared the in-memory list.)
                 }
             }
+        }
+
+        private void ShowGoToItem()
+        {
+            Model.ShowGoToItemPrompt = true;
+            Model.ErrorOpeningItem = false;
+        }
+
+        private async void GoToItem()
+        {
+            if (Model.ShowGoToItemPrompt)
+            {
+                Model.GoingToItem = true;
+                Model.ErrorOpeningItem = false;
+
+                bool success = false;
+
+                switch (Model.RootConfiguration.SelectedItemType)
+                {
+                    case ItemType.WorkItem:
+                        if (int.TryParse(Model.RootConfiguration.SelectedItemId, out int bugNumber))
+                        {
+                            success = await Model.RootConfiguration.OpenBug(Model.RootConfiguration.SelectedWorkItemServer, bugNumber);
+                        }
+                        break;
+                    case ItemType.Changeset:
+                        if (string.IsNullOrEmpty(Model.RootConfiguration.SelectedItemId) == false)
+                        {
+                            success = await Model.RootConfiguration.OpenChangeset(Model.RootConfiguration.SelectedSourceControlServer, Model.RootConfiguration.SelectedItemId);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+
+                if (success)
+                {
+                    Model.ShowGoToItemPrompt = false;
+                }
+                else
+                {
+                    Model.ErrorOpeningItem = true;
+                }
+
+                Model.GoingToItem = false;
+            }
+        }
+
+        private void CloseGoToItem()
+        {
+            Model.ShowGoToItemPrompt = false;
         }
 
         private void ClearFilters()
