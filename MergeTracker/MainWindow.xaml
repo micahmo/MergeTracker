@@ -274,7 +274,8 @@
                                                     <xctk:RichTextBox Grid.Column="0" Margin="5,0,0,0" Height="20" ToolTip="{Binding BugNumber}"
                                                                       Text="{Binding BugNumber, UpdateSourceTrigger=PropertyChanged,
                                                                       Converter={StaticResource HighlightedTextConverter}, ConverterParameter=BugNumber}"
-                                                                      AcceptsReturn="False">
+                                                                      AcceptsReturn="False"
+                                                                      KeyDown="RichTextBox_KeyDown">
                                                         <xctk:RichTextBox.TextFormatter>
                                                             <xctk:XamlFormatter />
                                                         </xctk:RichTextBox.TextFormatter>

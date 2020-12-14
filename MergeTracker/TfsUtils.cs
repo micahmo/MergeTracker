@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
@@ -61,6 +62,17 @@ namespace MergeTracker
 
                 return null;
             });
+        }
+
+        public static async Task OpenWorkItem(string serverName, int workItemId)
+        {
+            if (await GetWorkItem(serverName, workItemId) is { } workItem)
+            {
+                if (workItem.Links.Links.TryGetValue("html", out var html) && html is ReferenceLink htmlReferenceLink)
+                {
+                    Process.Start(htmlReferenceLink.Href);
+                }
+            }
         }
 
         public static Task<TfvcChangeset> GetChangeset(string serverName, int changesetId)

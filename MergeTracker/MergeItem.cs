@@ -213,13 +213,7 @@ namespace MergeTracker
                 {
                     if (dataGrid.SelectedItem is MergeTarget mergeTarget && int.TryParse(mergeTarget.BugNumber, out int bugNumber))
                     {
-                        if (await TfsUtils.GetWorkItem(mergeTarget.WorkItemServer, bugNumber) is { } workItem)
-                        {
-                            if (workItem.Links.Links.TryGetValue("html", out var html) && html is ReferenceLink htmlReferenceLink)
-                            {
-                                Process.Start(htmlReferenceLink.Href);
-                            }
-                        }
+                        await TfsUtils.OpenWorkItem(mergeTarget.WorkItemServer, bugNumber);
                     }
                 }
                 catch (Exception ex)

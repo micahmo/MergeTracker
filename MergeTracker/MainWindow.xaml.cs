@@ -1,17 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using LiteDB;
 using MergeTracker.DataConverters;
+using Xctk = Xceed.Wpf.Toolkit;
 
 namespace MergeTracker
 {
@@ -86,6 +87,19 @@ namespace MergeTracker
         private void ReloadCommand_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             Model.Commands.ReloadMergeItemsCommand.Execute(null);
+        }
+
+        // Fired when the user presses a key in one of the "item" TextBoxes, such as Work Item or Changeset
+        private async void RichTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                // Control-Enter will invoke the special Open command on the bound object
+                if (sender is Xctk.RichTextBox textBox && textBox.DataContext is MergeTarget mergeTarget && int.TryParse(mergeTarget.BugNumber, out int bugNumber))
+                {
+                    await TfsUtils.OpenWorkItem(mergeTarget.WorkItemServer, bugNumber);
+                }
+            }
         }
     }
 
