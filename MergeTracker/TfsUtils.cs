@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
@@ -63,6 +64,17 @@ namespace MergeTracker
             });
         }
 
+        public static async Task OpenWorkItem(string serverName, int workItemId)
+        {
+            if (await GetWorkItem(serverName, workItemId) is { } workItem)
+            {
+                if (workItem.Links.Links.TryGetValue("html", out var html) && html is ReferenceLink htmlReferenceLink)
+                {
+                    Process.Start(htmlReferenceLink.Href);
+                }
+            }
+        }
+
         public static Task<TfvcChangeset> GetChangeset(string serverName, int changesetId)
         {
             return Task.Run(async () =>
@@ -87,6 +99,28 @@ namespace MergeTracker
 
                 return null;
             });
+        }
+
+        public static async Task OpenChangeset(string serverName, int changesetId)
+        {
+            if (await GetChangeset(serverName, changesetId) is TfvcChangeset changeset)
+            {
+                if (changeset.Links.Links.TryGetValue("web", out var html) && html is ReferenceLink htmlReferenceLink)
+                {
+                    Process.Start(htmlReferenceLink.Href);
+                }
+            }
+        }
+
+        public static async Task OpenCommit(string serverName, string projectName, string repositoryName, string commitId)
+        {
+            if (await GetCommit(serverName, projectName, repositoryName, commitId) is GitCommit commit)
+            {
+                if (commit.Links.Links.TryGetValue("web", out var html) && html is ReferenceLink htmlReferenceLink)
+                {
+                    Process.Start(htmlReferenceLink.Href);
+                }
+            }
         }
 
         private static readonly HashSet<string> _failedToConnect = new HashSet<string>();

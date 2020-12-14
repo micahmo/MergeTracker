@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace MergeTracker
@@ -9,14 +11,13 @@ namespace MergeTracker
     /// </summary>
     public class MyDataGrid : DataGrid
     {
-
         protected override void OnKeyDown(KeyEventArgs e)
         {
             base.OnKeyDown(e);
 
             if (e.Key == Key.Enter && Keyboard.PrimaryDevice.ActiveSource is { })
             {
-                if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) == false)
+                if (Keyboard.Modifiers == ModifierKeys.None)
                 {
                     // Standard Enter key. Simulate the Tab press to focus the control.
                     InputManager.Current.ProcessInput(new KeyEventArgs(Keyboard.PrimaryDevice, Keyboard.PrimaryDevice.ActiveSource, 0, Key.Tab)
@@ -24,7 +25,7 @@ namespace MergeTracker
                         RoutedEvent = Keyboard.KeyDownEvent
                     });
                 }
-                else
+                else if (Keyboard.Modifiers == ModifierKeys.Shift)
                 {
                     // This is a Shift-Enter. We have to wait for the keys to be processed, so that the Shift modifier key is no longer pressed.
                     // Queue up the simulated Tab event for when the Shift key is raised.

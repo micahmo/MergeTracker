@@ -1,17 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using LiteDB;
 using MergeTracker.DataConverters;
+using Xctk = Xceed.Wpf.Toolkit;
 
 namespace MergeTracker
 {
@@ -86,6 +87,43 @@ namespace MergeTracker
         private void ReloadCommand_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             Model.Commands.ReloadMergeItemsCommand.Execute(null);
+        }
+
+        // Fired when the user presses a key in one of the "item" TextBoxes, such as Work Item or Changeset
+        // Use PreviewKeyDown because some keys get filtered out due to funky logic in the base OnKeyDown handler.
+        private async void DataGrid_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            // Control-Enter will allow the user to quickly open an item
+            if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                // Find our sender DataGrid, with its bound MergeItem
+                // and our sender RichTextBox with its bound MergeTarget
+                if (sender is DataGrid dataGrid && dataGrid.DataContext is MergeItem mergeItem &&
+                    e.OriginalSource is Xctk.RichTextBox textBox && textBox.DataContext is MergeTarget mergeTarget)
+                {
+                    // Now find out which one
+                    var bindingExpression = textBox.GetBindingExpression(Xctk.RichTextBox.TextProperty);
+                    string bindingPath = bindingExpression?.ParentBinding.Path.Path;
+                    
+                    switch (bindingPath)
+                    {
+                        case nameof(MergeTarget.BugNumber):
+                            if (int.TryParse(mergeTarget.BugNumber, out int bugNumber))
+                            {
+                                await mergeItem.OpenBug(mergeTarget.WorkItemServer, bugNumber);
+                            }
+                            break;
+                        case nameof(mergeTarget.Changeset):
+                            if (string.IsNullOrEmpty(mergeTarget.Changeset) == false)
+                            {
+                                await mergeItem.OpenChangeset(mergeTarget.SourceControlServer, mergeTarget.Changeset);
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
         }
     }
 
