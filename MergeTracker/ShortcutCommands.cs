@@ -8,10 +8,13 @@ namespace MergeTracker
         {
             ReloadCommand.InputGestures.Add(new KeyGesture(Key.F5));
             GoToItemCommand.InputGestures.Add(new KeyGesture(Key.G, ModifierKeys.Control));
+            FindCommand.InputGestures.Add(new KeyGesture(Key.F, ModifierKeys.Control));
         }
 
         public static RoutedCommand ReloadCommand { get; } = new RoutedCommand();
 
         public static RoutedCommand GoToItemCommand { get; } = new RoutedCommand();
+
+        public static RoutedCommand FindCommand { get; } = new RoutedCommand();
     }
 }

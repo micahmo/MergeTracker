@@ -176,6 +176,12 @@ namespace MergeTracker
                 richTextBox.GetType().GetMethod("UpdateDocumentFromText", BindingFlags.Instance | BindingFlags.NonPublic)?.Invoke(richTextBox, null);
             }
         }
+
+        private void FindCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            FilterTextBox.SelectAll();
+            FilterTextBox.Focus();
+        }
     }
 
     internal class MainWindowModel : ObservableObject
