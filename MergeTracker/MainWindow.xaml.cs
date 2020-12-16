@@ -244,6 +244,9 @@ namespace MergeTracker
         public ICommand CloseGoToItemCommand => _closeGoToItemCommand ??= new RelayCommand(CloseGoToItem);
         private RelayCommand _closeGoToItemCommand;
 
+        public ICommand CopyItemUrlCommand => _copyItemUrlCommand ??= new RelayCommand(CopyItemUrl);
+        private RelayCommand _copyItemUrlCommand;
+
         public ICommand ClearFiltersCommand => _clearFiltersCommand ??= new RelayCommand(ClearFilters);
         private RelayCommand _clearFiltersCommand;
 
@@ -387,6 +390,45 @@ namespace MergeTracker
         private void CloseGoToItem()
         {
             Model.ShowGoToItemPrompt = false;
+        }
+
+        private async void CopyItemUrl()
+        {
+            Model.GoingToItem = true;
+            Model.ErrorOpeningItem = false;
+
+            bool success = false;
+
+            switch (Model.RootConfiguration.SelectedItemType)
+            {
+                case ItemType.WorkItem:
+                    if (int.TryParse(Model.RootConfiguration.SelectedItemId, out int bugNumber))
+                    {
+                        success = await Model.RootConfiguration.CopyBugUrl(Model.RootConfiguration.SelectedWorkItemServer, bugNumber);
+                    }
+
+                    break;
+                case ItemType.Changeset:
+                    if (string.IsNullOrEmpty(Model.RootConfiguration.SelectedItemId) == false)
+                    {
+                        success = await Model.RootConfiguration.CopyChangesetOrCommitUrl(Model.RootConfiguration.SelectedSourceControlServer, Model.RootConfiguration.SelectedItemId);
+                    }
+
+                    break;
+                default:
+                    break;
+            }
+
+            if (success)
+            {
+                Model.ShowGoToItemPrompt = false;
+            }
+            else
+            {
+                Model.ErrorOpeningItem = true;
+            }
+
+            Model.GoingToItem = false;
         }
 
         private void ClearFilters()

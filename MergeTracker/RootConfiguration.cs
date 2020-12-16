@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using GalaSoft.MvvmLight;
 using LiteDB;
@@ -150,7 +151,7 @@ namespace MergeTracker
         }
         private string _selectedItemId;
 
-        public async Task<bool> OpenBug(string workItemServer, int bugNumber, MergeItem mergeItem = null)
+        public async Task<bool> PerformMergeItemTaskAsync(Func<Task> taskToPerform, MergeItem mergeItem = null)
         {
             bool result = false;
 
@@ -160,14 +161,14 @@ namespace MergeTracker
 
                 try
                 {
-                    await TfsUtils.OpenWorkItem(workItemServer, bugNumber);
+                    await taskToPerform();
                     result = true;
                 }
                 catch (Exception ex)
                 {
                     if (mergeItem is { })
                     {
-                        mergeItem.LastError = $"There was an error opening work item.\n\n{ex}";
+                        mergeItem.LastError = $"There was an error performing the task.\n\n{ex}";
                     }
                 }
 
@@ -177,51 +178,39 @@ namespace MergeTracker
             return result;
         }
 
-        public async Task<bool> OpenChangeset(string sourceControlServer, string changeset, MergeItem mergeItem = null)
+        public Task<bool> OpenBug(string workItemServer, int bugNumber, MergeItem mergeItem = null)
         {
-            bool result = false;
-
-            if (UseTfs)
+            return PerformMergeItemTaskAsync(async () =>
             {
-                Mouse.OverrideCursor = Cursors.Wait;
+                await TfsUtils.OpenWorkItem(workItemServer, bugNumber);
+            }, mergeItem);
+        }
 
-                try
+        public Task<bool> OpenChangeset(string sourceControlServer, string changeset, MergeItem mergeItem = null)
+        {
+            return PerformMergeItemTaskAsync(async () =>
+            {
+                foreach (string changesetString in changeset.Split(new[] {",", ";"}, StringSplitOptions.RemoveEmptyEntries))
                 {
-                    foreach (string changesetString in changeset.Split(new[] { ",", ";" }, StringSplitOptions.RemoveEmptyEntries))
-                    {
-                        // Check if it's a TFS changeset or a Git commit
-                        if (changesetString.Any(char.IsLetter))
-                        {
-                            // Git commit -- we need server name and project name
-                            if (sourceControlServer.Split(new[] { "|" }, StringSplitOptions.RemoveEmptyEntries) is { } parts && parts.Length == 3)
-                            {
-                                await TfsUtils.OpenCommit(parts[0], parts[1], parts[2], changesetString);
-                                result = true;
-                            }
-                        }
-                        else
-                        {
-                            // TFS changeset
-                            if (int.TryParse(changesetString, out int changesetId))
-                            {
-                                await TfsUtils.OpenChangeset(sourceControlServer, changesetId);
-                                result = true;
-                            }
-                        }
-                    }
+                    await TfsUtils.OpenChangesetOrCommit(sourceControlServer, changesetString);
                 }
-                catch (Exception ex)
-                {
-                    if (mergeItem is { })
-                    {
-                        mergeItem.LastError = $"There was an error opening changeset.\n\n{ex}";
-                    }
-                }
+            }, mergeItem);
+        }
 
-                Mouse.OverrideCursor = null;
-            }
+        public Task<bool> CopyBugUrl(string workItemServer, int bugNumber, MergeItem mergeItem = null)
+        {
+            return PerformMergeItemTaskAsync(async () =>
+            {
+                Clipboard.SetText(await TfsUtils.GetWorkItemUrl(workItemServer, bugNumber));
+            }, mergeItem);
+        }
 
-            return result;
+        public Task<bool> CopyChangesetOrCommitUrl(string sourceControlServer, string changeset, MergeItem mergeItem = null)
+        {
+            return PerformMergeItemTaskAsync(async () =>
+            {
+                Clipboard.SetText(await TfsUtils.GetChangesetOrCommitUrl(sourceControlServer, changeset));
+            }, mergeItem);
         }
 
         public static RootConfiguration Load()

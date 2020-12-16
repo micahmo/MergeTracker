@@ -68,15 +68,18 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock x:Name="ErrorTextBox" Text="Error opening item!" Foreground="Red" Margin="5"
+            <TextBlock x:Name="ErrorTextBox" Text="Error accessing item!" Foreground="Red" Margin="5"
                        Visibility="{c:Binding ErrorOpeningItem, FalseToVisibility=Collapsed}"
                        IsVisibleChanged="ErrorTextBlock_IsVisibleChanged"/>
 
-            <Button Grid.Column="2" Margin="5" Padding="5" MinWidth="50" Content="Cancel"
+            <Button Grid.Column="2" Margin="5" Padding="5" MinWidth="50" Content="Copy URL"
+                    Command="{Binding Commands.CopyItemUrlCommand}"/>
+            <Button Grid.Column="3" Margin="5" Padding="5" MinWidth="50" Content="Cancel"
                                     Command="{Binding Commands.CloseGoToItemCommand}"/>
-            <Button Grid.Column="3" Margin="5" Padding="5" MinWidth="50" Content="Go"
+            <Button Grid.Column="4" Margin="5" Padding="5" MinWidth="50" Content="Go"
                                     Command="{Binding Commands.GoToItemCommand}"/>
         </Grid>
     </Grid>

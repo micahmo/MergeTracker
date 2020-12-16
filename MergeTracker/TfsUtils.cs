@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
@@ -64,15 +65,22 @@ namespace MergeTracker
             });
         }
 
-        public static async Task OpenWorkItem(string serverName, int workItemId)
+        public static async Task<string> GetWorkItemUrl(string serverName, int workItemId)
         {
             if (await GetWorkItem(serverName, workItemId) is { } workItem)
             {
                 if (workItem.Links.Links.TryGetValue("html", out var html) && html is ReferenceLink htmlReferenceLink)
                 {
-                    Process.Start(htmlReferenceLink.Href);
+                    return htmlReferenceLink.Href;
                 }
             }
+
+            throw new Exception($"Unable to access work item ID {workItemId} on server {serverName}.");
+        }
+
+        public static async Task OpenWorkItem(string serverName, int workItemId)
+        {
+            Process.Start(await GetWorkItemUrl(serverName, workItemId));
         }
 
         public static Task<TfvcChangeset> GetChangeset(string serverName, int changesetId)
@@ -101,26 +109,63 @@ namespace MergeTracker
             });
         }
 
-        public static async Task OpenChangeset(string serverName, int changesetId)
+        public static async Task<string> GetChangesetUrl(string serverName, int changesetId)
         {
             if (await GetChangeset(serverName, changesetId) is TfvcChangeset changeset)
             {
                 if (changeset.Links.Links.TryGetValue("web", out var html) && html is ReferenceLink htmlReferenceLink)
                 {
-                    Process.Start(htmlReferenceLink.Href);
+                    return htmlReferenceLink.Href;
                 }
             }
+
+            throw new Exception($"Unable to access changeset ID {changesetId} on server {serverName}.");
         }
 
-        public static async Task OpenCommit(string serverName, string projectName, string repositoryName, string commitId)
+        public static async Task OpenChangeset(string serverName, int changesetId)
+        {
+            Process.Start(await GetChangesetUrl(serverName, changesetId));
+        }
+
+        public static async Task<string> GetCommitUrl(string serverName, string projectName, string repositoryName, string commitId)
         {
             if (await GetCommit(serverName, projectName, repositoryName, commitId) is GitCommit commit)
             {
                 if (commit.Links.Links.TryGetValue("web", out var html) && html is ReferenceLink htmlReferenceLink)
                 {
-                    Process.Start(htmlReferenceLink.Href);
+                    return htmlReferenceLink.Href;
                 }
             }
+
+            throw new Exception($"Unable to access commit ID {commitId} on server {serverName}.");
+        }
+
+        public static async Task<string> GetChangesetOrCommitUrl(string serverName, string id)
+        {
+            // Check if it's a TFS changeset or a Git commit
+            if (id.Any(char.IsLetter))
+            {
+                // Git commit -- we need server name and project name
+                if (serverName.Split(new[] { "|" }, StringSplitOptions.RemoveEmptyEntries) is { } parts && parts.Length == 3)
+                {
+                    return await GetCommitUrl(parts[0], parts[1], parts[2], id);
+                }
+            }
+            else
+            {
+                // TFS changeset
+                if (int.TryParse(id, out int changesetId))
+                {
+                    return await GetChangesetUrl(serverName, changesetId);
+                }
+            }
+
+            throw new Exception($"Unable to access commit or changeset ID {id} on server {serverName}.");
+        }
+
+        public static async Task OpenChangesetOrCommit(string serverName, string id)
+        {
+            Process.Start(await GetChangesetOrCommitUrl(serverName, id));
         }
 
         private static readonly HashSet<string> _failedToConnect = new HashSet<string>();
