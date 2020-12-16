@@ -157,6 +157,9 @@ namespace MergeTracker
         public ICommand OpenBugCommand => _openBugCommand ??= new RelayCommand<DataGrid>(OpenBug);
         private RelayCommand<DataGrid> _openBugCommand;
 
+        public ICommand CopyChangesetCommand => _copyChangesetCommand ??= new RelayCommand<DataGrid>(CopyChangeset);
+        private RelayCommand<DataGrid> _copyChangesetCommand;
+
         public ICommand OpenChangesetCommand => _openChangesetCommand ??= new RelayCommand<DataGrid>(OpenChangeset);
         private RelayCommand<DataGrid> _openChangesetCommand;
 
@@ -204,6 +207,14 @@ namespace MergeTracker
             if (dataGrid.SelectedItem is MergeTarget mergeTarget && int.TryParse(mergeTarget.BugNumber, out int bugNumber))
             {
                 await RootConfiguration.Instance.OpenBug(mergeTarget.WorkItemServer, bugNumber, Model);
+            }
+        }
+
+        private void CopyChangeset(DataGrid dataGrid)
+        {
+            if (dataGrid.SelectedItem is MergeTarget mergeTarget && string.IsNullOrEmpty(mergeTarget.Changeset) == false)
+            {
+                Clipboard.SetData(DataFormats.Text, mergeTarget.Changeset);
             }
         }
 

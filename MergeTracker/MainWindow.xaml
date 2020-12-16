@@ -333,6 +333,7 @@
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="*"/>
                                                             <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="Auto"/>
                                                         </Grid.ColumnDefinitions>
 
                                                         <xctk:RichTextBox Grid.Column="0" Margin="5,0,0,0" Height="20" ToolTip="{Binding Changeset}"
@@ -343,7 +344,11 @@
                                                                 <xctk:XamlFormatter />
                                                             </xctk:RichTextBox.TextFormatter>
                                                         </xctk:RichTextBox>
-                                                        <Button Grid.Column="1" Width="20" Margin="0,0,5,0" Height="20" HorizontalAlignment="Right" Content="◥"
+                                                        <Button Grid.Column="1" Width="20" Height="20" HorizontalAlignment="Right" Content="❐"
+                                                                Command="{Binding DataContext.Commands.CopyChangesetCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                                CommandParameter="{Binding ElementName=DataGrid}"
+                                                                ToolTip="Copy changeset(s) to clipboard"/>
+                                                        <Button Grid.Column="2" Width="20" Margin="0,0,5,0" Height="20" HorizontalAlignment="Right" Content="◥"
                                                             Command="{Binding DataContext.Commands.OpenChangesetCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                             CommandParameter="{Binding ElementName=DataGrid}"
                                                             ToolTip="Open changeset(s) in TFS web (Ctrl-Enter)"/>
