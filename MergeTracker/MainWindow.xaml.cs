@@ -161,6 +161,14 @@ namespace MergeTracker
                     Model.Commands.CloseGoToItemCommand?.Execute(null);
                 }
             }
+            else if (FilterTextBox.IsFocused)
+            {
+                if (e.Key == Key.Escape && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    FilterTextBox.Focus();
+                    FilterTextBox.Clear();
+                }
+            }
         }
 
         // On LostFocus, we need to force the RichTextBox to update with the latest formatting as determined by the converter.
