@@ -162,6 +162,20 @@ namespace MergeTracker
                 }
             }
         }
+
+        // On LostFocus, we need to force the RichTextBox to update with the latest formatting as determined by the converter.
+        // The only way this could happen automatically is if we either...
+        //  a. Set UpdateSourceTrigger to LostFocus, but then the update would be too slow and we'd miss some changes, or
+        //  b. Set a Delay on UpdateSourceTrigger of PropertyChanged, but then it interrupts the user's workflow (puts the cursor back at the beginning)
+        // As it stands, on LostFocus, the correct value IS run through the converter and assigned back to the RichTextBox.Text property,
+        // but the document in the underlying WPF RichTextBox does not update. Calling "UpdateDocumentFromText" forces it to.
+        private void RichTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is Xctk.RichTextBox richTextBox)
+            {
+                richTextBox.GetType().GetMethod("UpdateDocumentFromText", BindingFlags.Instance | BindingFlags.NonPublic)?.Invoke(richTextBox, null);
+            }
+        }
     }
 
     internal class MainWindowModel : ObservableObject

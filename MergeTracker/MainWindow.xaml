@@ -206,7 +206,8 @@
 
                                 <xctk:RichTextBox Grid.Column="0" Grid.Row="0" Margin="5" Padding="5" ToolTip="{Binding Name}"
                                               Text="{Binding Name, UpdateSourceTrigger=PropertyChanged,
-                                              Converter={StaticResource HighlightedTextConverter}, ConverterParameter=Name}">
+                                              Converter={StaticResource HighlightedTextConverter}, ConverterParameter=Name}"
+                                              LostFocus="RichTextBox_LostFocus">
                                     <xctk:RichTextBox.TextFormatter>
                                         <xctk:XamlFormatter />
                                     </xctk:RichTextBox.TextFormatter>
@@ -292,7 +293,7 @@
                                                         <xctk:RichTextBox Grid.Column="0" Margin="5,0,0,0" Height="20" ToolTip="{Binding BugNumber}"
                                                                       Text="{Binding BugNumber, UpdateSourceTrigger=PropertyChanged,
                                                                       Converter={StaticResource HighlightedTextConverter}, ConverterParameter=BugNumber}"
-                                                                      AcceptsReturn="False">
+                                                                      AcceptsReturn="False" LostFocus="RichTextBox_LostFocus">
                                                             <xctk:RichTextBox.TextFormatter>
                                                                 <xctk:XamlFormatter />
                                                             </xctk:RichTextBox.TextFormatter>
@@ -316,7 +317,7 @@
                                                     <xctk:RichTextBox Margin="5,0,5,0" Height="20" ToolTip="{Binding TargetBranch}"
                                                                   Text="{Binding TargetBranch, UpdateSourceTrigger=PropertyChanged,
                                                                   Converter={StaticResource HighlightedTextConverter}, ConverterParameter=TargetBranch}"
-                                                                  AcceptsReturn="False">
+                                                                  AcceptsReturn="False" LostFocus="RichTextBox_LostFocus">
                                                         <xctk:RichTextBox.TextFormatter>
                                                             <xctk:XamlFormatter />
                                                         </xctk:RichTextBox.TextFormatter>
@@ -337,7 +338,7 @@
                                                         <xctk:RichTextBox Grid.Column="0" Margin="5,0,0,0" Height="20" ToolTip="{Binding Changeset}"
                                                                       Text="{Binding Changeset, UpdateSourceTrigger=PropertyChanged,
                                                                       Converter={StaticResource HighlightedTextConverter}, ConverterParameter=Changeset}"
-                                                                      AcceptsReturn="False">
+                                                                      AcceptsReturn="False" LostFocus="RichTextBox_LostFocus">
                                                             <xctk:RichTextBox.TextFormatter>
                                                                 <xctk:XamlFormatter />
                                                             </xctk:RichTextBox.TextFormatter>
