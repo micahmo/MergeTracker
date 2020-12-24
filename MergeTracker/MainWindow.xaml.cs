@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using LinqKit;
 using LiteDB;
 using MergeTracker.DataConverters;
 using Xctk = Xceed.Wpf.Toolkit;
@@ -294,48 +295,50 @@ namespace MergeTracker
 
             #region Notes about implementation
 
-            // TODO: Change these queries to use C# query syntax and PredicateBuilder once issue 1897 is fixed in LiteDB.
-            // https://github.com/mbdavid/LiteDB/issues/1897
-            // For now, we have to hard-code the query syntax for all parameters.
+            // Despite https://github.com/mbdavid/LiteDB/issues/1897 not being fixed yet, a solution was suggested to me.
+            // The key is to Select the property on which to filter. For example, instead of using:
+            //  i.MergeTargets.Where(t => t.IsCompleted == true).Any())
+            // use
+            //  i.MergeTargets.Select(t => t.IsCompleted).Any(c => c == true)
+            // And note that one big Any() is NOT supported, like:
+            //  i.MergeTargets.Any(t => t.IsCompleted == true)
+            // This seems to solve my issue, so I am able to use ILiteQueryable and PredicateBuilder.
 
-            // I also could not get parameterization to work without issues, so we are potentially vulnerable to parameter injection.
-            // That being said, I was not able to get an injection to work.
+            // Even using this syntax, which generates query parameters, injections are not prevented.
+            // That being said, the limitations of LiteDB seem to prevent and real danger from an injection.
+            // The most important thing is to handle exceptions upon performing the query, so that malformed queries don't crash.
             //  1. It looks like LiteDB cannot support multiple statements, so ending the query and staring a new line
             //     (that does anything other than SELECT) doesn't seem to work.
             //  2. We are not directly building the whole statement using interpolated strings, only the were clause.
             //     It seems like, at worst, we'll have a poorly formed where clause, but no injection.
 
-            // Below is the ONLY way I could get everything to work with complex queries. :-)
-
             #endregion
 
-            var mergeItemsQuery = DatabaseEngine.MergeItemCollection.Include(i => i.MergeTargets);
-            string query = null;
-            string subQuery = null;
+            ILiteCollection<MergeItem> mergeItems = DatabaseEngine.MergeItemCollection.Include(i => i.MergeTargets);
+            
+            // Default the predicate to true, so if there are no query parameters, we get everything.
+            ExpressionStarter<MergeItem> queryPredicate = PredicateBuilder.New<MergeItem>(true);
+            ExpressionStarter<MergeItem> subQueryPredicate = PredicateBuilder.New<MergeItem>(true);
 
             // NotCompletedFilter has highest precedence, so it must be an AND.
             if (Model.RootConfiguration.NotCompletedFilter)
             {
-                query = query.AddClause("AND", "COUNT(FILTER($.MergeTargets[*]=>@.IsCompleted!=true))>0");
+                // Use != true so that we get false and null (for indeterminate state).
+                queryPredicate = queryPredicate.And(i => i.MergeTargets.Select(t => t.IsCompleted).Any(c => c != true));
             }
 
             if (string.IsNullOrEmpty(Model.RootConfiguration.Filter) == false)
             {
-                subQuery = subQuery.AddClause("AND", $"Name LIKE '%{Model.RootConfiguration.Filter}%'");
+                // Note: Due to this expression eventually being converted to a DB query with LIKE %%, it is naturally case-insensitive.
+                subQueryPredicate = subQueryPredicate.And(i => i.Name.Contains(Model.RootConfiguration.Filter));
             }
 
             if (string.IsNullOrEmpty(Model.RootConfiguration.Filter) == false)
             {
-                subQuery = subQuery.AddClause("OR", "COUNT(FILTER($.MergeTargets[*]=>" +
-                                                    $"@.BugNumber LIKE '%{Model.RootConfiguration.Filter}%' OR " +
-                                                    $"@.Changeset LIKE '%{Model.RootConfiguration.Filter}%' OR " +
-                                                    $"@.TargetBranch LIKE '%{Model.RootConfiguration.Filter}%'" +
-                                                    "))>0");
-            }
-
-            if (string.IsNullOrEmpty(subQuery) == false)
-            {
-                query = query.AddClause("AND", $"({subQuery})");
+                subQueryPredicate = subQueryPredicate.Or(i =>
+                    i.MergeTargets.Select(t => t.BugNumber).Any(bn => bn.Contains(Model.RootConfiguration.Filter)) ||
+                    i.MergeTargets.Select(t => t.Changeset).Any(cs => cs.Contains(Model.RootConfiguration.Filter)) ||
+                    i.MergeTargets.Select(t => t.TargetBranch).Any(tb => tb.Contains(Model.RootConfiguration.Filter)));
             }
 
             // Use a wait cursor with a specific dispatcher priority, so that we can ensure that it doesn't change until the UI is responsive
@@ -345,7 +348,7 @@ namespace MergeTracker
 
                 try
                 {
-                    mergeItemsQuery.Find(query ?? "1=1").OrderByDescending(i => i.ObjectId).ToList().ForEach(i => Model.RootConfiguration.MergeItems.Add(i));
+                    mergeItems.Query().Where(queryPredicate.And(subQueryPredicate)).OrderByDescending(i => i.ObjectId).ToList().ForEach(i => Model.RootConfiguration.MergeItems.Add(i));
                 }
                 catch (LiteException)
                 {
