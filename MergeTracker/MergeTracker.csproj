@@ -6,9 +6,17 @@
     <UseWPF>true</UseWPF>
     <LangVersion>8</LangVersion>
     <ApplicationIcon>icon.ico</ApplicationIcon>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
+    <Authors>Micah Morrison</Authors>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="icon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AppHelpers.WPF" Version="0.1.0-rc3" />
     <PackageReference Include="CalcBinding" Version="2.5.2" />
     <PackageReference Include="Costura.Fody" Version="5.0.0-alpha0411">
       <PrivateAssets>all</PrivateAssets>
@@ -21,6 +29,10 @@
     <PackageReference Include="LiteDB" Version="5.0.9" />
     <PackageReference Include="MvvmLightLibs" Version="5.3.0" />
     <PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="16.172.0-preview" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="icon.ico" />
   </ItemGroup>
 
 </Project>

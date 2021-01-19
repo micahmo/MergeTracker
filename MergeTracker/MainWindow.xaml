@@ -11,15 +11,17 @@
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=local:MainWindowModel}"
         Title="Merge Tracker" Height="800" Width="1500"
-
+        Icon="icon.ico"
         Closing="Window_Closing"
         SizeChanged="Window_SizeChanged"
-        KeyDown="Window_KeyDown">
+        KeyDown="Window_KeyDown"
+        Loaded="Window_Loaded">
 
     <Window.CommandBindings>
         <CommandBinding Command="{x:Static local:ShortcutCommands.ReloadCommand}" Executed="ReloadCommand_Executed"/>
         <CommandBinding Command="{x:Static local:ShortcutCommands.GoToItemCommand}" Executed="GoToItemCommand_Executed"/>
         <CommandBinding Command="{x:Static local:ShortcutCommands.FindCommand}" Executed="FindCommand_Executed"/>
+        <CommandBinding Command="{x:Static local:ShortcutCommands.AboutBoxCommand}" Executed="AboutBoxCommand_Executed"/>
     </Window.CommandBindings>
 
     <Window.Resources>
