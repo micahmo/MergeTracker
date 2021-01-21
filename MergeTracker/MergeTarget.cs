@@ -80,12 +80,14 @@ namespace MergeTracker
 
         public void GenerateCheckinNote(MergeItem mergeItem)
         {
-            string originalBugNumber = mergeItem.MergeTargets.FirstOrDefault(t => t.IsOriginal)?.BugNumber ?? "UNKNOWN_BUG";
-            string originalVersionNumber = mergeItem.MergeTargets.FirstOrDefault(t => t.IsOriginal)?.TargetBranch ?? "UNKNOWN_VERSION";
-            string targetVersionNumber = TargetBranch ?? "UNKNOWN_TARGET_BRANCH";
-            string targetBugNumber = string.IsNullOrEmpty(BugNumber) ? string.Empty : $"For bug {BugNumber}: ";
+            string originalBugNumber = mergeItem.MergeTargets.FirstOrDefault(t => t.IsOriginal)?.BugNumber;
+            string originalVersionNumber = mergeItem.MergeTargets.FirstOrDefault(t => t.IsOriginal)?.TargetBranch;
 
-            string result = $"{targetBugNumber}Merge fix for {originalBugNumber} ({originalVersionNumber}) into {targetVersionNumber}.";
+            string result = RootConfiguration.Instance.CheckInMessage
+                .Replace("%o", originalBugNumber)
+                .Replace("%v", originalVersionNumber)
+                .Replace("%b", TargetBranch)
+                .Replace("%t", BugNumber);
 
             Clipboard.SetData(DataFormats.Text, result);
         }
