@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <AppUpdate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/micahmo/MergeTracker/master/MergeTracker/AppUpdate.xsd">
-  <Version>1.0</Version>
-  <ReleaseDate>2021-01-19</ReleaseDate>
+  <Version>1.1.0.0</Version>
+  <ReleaseDate>2021-01-21</ReleaseDate>
   <!-- Default download -->
-  <DownloadLink>https://github.com/micahmo/MergeTracker/releases/download/v1.0/MergeTracker.exe</DownloadLink>
+  <DownloadLink>https://github.com/micahmo/MergeTracker/releases/download/v1.1/MergeTracker.exe</DownloadLink>
   <DownloadFileName>MergeTracker.exe</DownloadFileName>
   <!-- All download options -->
   <Downloads>
     <Download key="portable">
-      <Link>https://github.com/micahmo/MergeTracker/releases/download/v1.0/MergeTracker.exe</Link>
+      <Link>https://github.com/micahmo/MergeTracker/releases/download/v1.1/MergeTracker.exe</Link>
       <FileName>MergeTracker.exe</FileName>
       <FileHash></FileHash>
     </Download>
   </Downloads>
   <!-- Release notes -->
-  <VersionNotes>Initial release</VersionNotes>
+  <VersionNotes> - Customize check-in message</VersionNotes>
   <ReleaseNotes></ReleaseNotes>
 </AppUpdate>
