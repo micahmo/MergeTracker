@@ -158,6 +158,20 @@ namespace MergeTracker
         }
         private string _selectedItemId;
 
+        public string CheckInMessage
+        {
+            get => _checkInMessage;
+            set
+            {
+                Set(nameof(CheckInMessage), ref _checkInMessage, value);
+                RaisePropertyChanged(nameof(SampleCheckInMessage));
+            }
+        }
+        private string _checkInMessage = "For %t: Merge fix for %o (%v) into %b.";
+
+        public string SampleCheckInMessage =>
+            CheckInMessage.Replace("%t", "234567").Replace("%o", "111222").Replace("%v", "2.80").Replace("%b", "2.90");
+
         public async Task<bool> PerformMergeItemTaskAsync(Func<Task> taskToPerform, MergeItem mergeItem = null)
         {
             bool result = false;

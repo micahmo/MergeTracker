@@ -9,6 +9,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
+using Bluegrams.Application;
+using Bluegrams.Application.WPF;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using LinqKit;
@@ -50,6 +52,12 @@ namespace MergeTracker
             Timer autoSaveTimer = new Timer { Interval = TimeSpan.FromMinutes(1).TotalMilliseconds };
             autoSaveTimer.Elapsed += AutoSaveTimer_Elapsed;
             autoSaveTimer.Start();
+
+            _updateChecker = new MyUpdateChecker("https://raw.githubusercontent.com/micahmo/MergeTracker/master/MergeTracker/VersionInfo.xml")
+            {
+                Owner = this,
+                DownloadIdentifier = "portable"
+            };
         }
 
         private void MergeItem_MergeItemDeleted(object sender, EventArgs e)
@@ -191,6 +199,27 @@ namespace MergeTracker
             FilterTextBox.SelectAll();
             FilterTextBox.Focus();
         }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            _updateChecker.CheckForUpdates();
+        }
+
+        private void AboutBoxCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            new AboutBox(Icon, showLanguageSelection: false)
+            {
+                Owner = this,
+                UpdateChecker = _updateChecker,
+                
+            }.ShowDialog();
+        }
+
+        #region Private fields
+
+        private readonly WpfUpdateChecker _updateChecker;
+
+        #endregion
     }
 
     internal class MainWindowModel : ObservableObject

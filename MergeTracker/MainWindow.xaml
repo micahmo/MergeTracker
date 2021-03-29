@@ -11,15 +11,17 @@
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=local:MainWindowModel}"
         Title="Merge Tracker" Height="800" Width="1500"
-
+        Icon="icon.ico"
         Closing="Window_Closing"
         SizeChanged="Window_SizeChanged"
-        KeyDown="Window_KeyDown">
+        KeyDown="Window_KeyDown"
+        Loaded="Window_Loaded">
 
     <Window.CommandBindings>
         <CommandBinding Command="{x:Static local:ShortcutCommands.ReloadCommand}" Executed="ReloadCommand_Executed"/>
         <CommandBinding Command="{x:Static local:ShortcutCommands.GoToItemCommand}" Executed="GoToItemCommand_Executed"/>
         <CommandBinding Command="{x:Static local:ShortcutCommands.FindCommand}" Executed="FindCommand_Executed"/>
+        <CommandBinding Command="{x:Static local:ShortcutCommands.AboutBoxCommand}" Executed="AboutBoxCommand_Executed"/>
     </Window.CommandBindings>
 
     <Window.Resources>
@@ -53,6 +55,7 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="40"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
@@ -136,7 +139,36 @@
                     <TextBox Grid.Column="1" Text="{Binding RootConfiguration.DelimitedSourceControlServers}" ToolTip="{Binding RootConfiguration.DelimitedSourceControlServers}" Margin="5" Padding="5"/>
                 </Grid>
 
-                <ItemsControl Grid.Row="4" Margin="0,5,0,0" ItemsSource="{Binding RootConfiguration.MergeItems}" IsTabStop="False"
+                <Grid Grid.Row="4" Height="40" Visibility="{c:Binding RootConfiguration.ShowTfsSettings, FalseToVisibility=Collapsed}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Text="Check-in message:" Margin="5" Padding="5"/>
+                    <TextBox Grid.Column="1" Text="{Binding RootConfiguration.CheckInMessage, UpdateSourceTrigger=PropertyChanged}" Margin="5" Padding="5" ToolTipService.ShowDuration="60000">
+                        <TextBox.ToolTip>
+                            <TextBlock>
+                                <Run Text="This message will be copied to the clipboard when 'Generate Check-in Message' is clicked."/>
+                                <LineBreak/>
+                                <LineBreak/>
+                                <Run Text="%o = original bug number"/>
+                                <LineBreak/>
+                                <Run Text="%v = original branch"/>
+                                <LineBreak/>
+                                <Run Text="%t = target bug number"/>
+                                <LineBreak/>
+                                <Run Text="%b = target branch"/>
+                                <LineBreak/>
+                                <LineBreak/>
+                                <Run Text="Sample: "/>
+                                <Run Text="{Binding RootConfiguration.SampleCheckInMessage, Mode=OneWay}"/>
+                            </TextBlock>
+                        </TextBox.ToolTip>
+                    </TextBox>
+                </Grid>
+
+                <ItemsControl Grid.Row="5" Margin="0,5,0,0" ItemsSource="{Binding RootConfiguration.MergeItems}" IsTabStop="False"
                       VirtualizingPanel.ScrollUnit="Pixel">
                     <!--
                 The ItemsPanel and Template come from https://stackoverflow.com/a/2784220/4206279 
@@ -413,7 +445,7 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
-                <GridSplitter Grid.Row="4" VerticalAlignment="Top" HorizontalAlignment="Stretch" Background="DarkGray" Height="5" IsEnabled="False" />
+                <GridSplitter Grid.Row="5" VerticalAlignment="Top" HorizontalAlignment="Stretch" Background="DarkGray" Height="5" IsEnabled="False" />
             </Grid>
         </DockPanel>
     </xctk:BusyIndicator>
