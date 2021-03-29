@@ -98,6 +98,8 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="2*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
@@ -109,6 +111,9 @@
 
                     <TextBlock Grid.Column="4" Text="TFS Password:" Margin="5" Padding="5"/>
                     <PasswordBox Grid.Column="5" x:Name="TfsPasswordBox" PasswordChanged="PasswordBox_PasswordChanged" Margin="5" Padding="5"/>
+
+                    <TextBlock Grid.Column="6" Text="TFS Personal Access Token:" Margin="5" Padding="5"/>
+                    <TextBox Grid.Column="7" Text="{Binding RootConfiguration.TfsToken}" ToolTip="{Binding RootConfiguration.TfsToken}" Margin="5" Padding="5"/>
                 </Grid>
 
                 <Grid Grid.Row="2" Height="40" Visibility="{c:Binding RootConfiguration.ShowTfsSettings, FalseToVisibility=Collapsed}">

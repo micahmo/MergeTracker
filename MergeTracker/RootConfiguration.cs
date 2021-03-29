@@ -81,6 +81,13 @@ namespace MergeTracker
         }
         private string _tfsPassword;
 
+        public string TfsToken
+        {
+            get => _tfsToken;
+            set => Set(nameof(TfsToken), ref _tfsToken, value);
+        }
+        private string _tfsToken;
+
         public List<string> WorkItemServers
         {
             get => DelimitedWorkItemServers?.Split(new[] {";"}, StringSplitOptions.RemoveEmptyEntries).ToList();

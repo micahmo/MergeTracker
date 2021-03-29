@@ -31,8 +31,8 @@ namespace MergeTracker
                     {
                         try
                         {
-                            NetworkCredential nc = new NetworkCredential(RootConfiguration.Instance.TfsUsername, RootConfiguration.Instance.TfsPassword);
-                            VssCredentials vssCredentials = new VssCredentials(new WindowsCredential(nc));
+                            VssCredentials vssCredentials = GetCredentialsForServer(serverName, 
+                                RootConfiguration.Instance.TfsUsername, RootConfiguration.Instance.TfsPassword, RootConfiguration.Instance.TfsToken);
                             VssConnection vssConnection = new VssConnection(new Uri(serverName), vssCredentials);
 
                             // Trust all certificates. This is usually a bad idea!! But our TFS servers often have bad certs...
@@ -50,6 +50,25 @@ namespace MergeTracker
 
                 return result;
             });
+        }
+
+        private static VssCredentials GetCredentialsForServer(string serverName, string username, string password, string token)
+        {
+            VssCredentials vssCredentials;
+
+            if (serverName.ToLower().Contains("dev.azure.com"))
+            {
+                // You can only connect to Azure DevOps cloud instance with PAT
+                vssCredentials = new VssBasicCredential(string.Empty, token);
+            }
+            else
+            {
+                // On-prem instance, connect with given credentials.
+                NetworkCredential nc = new NetworkCredential(username, password);
+                vssCredentials = new VssCredentials(new WindowsCredential(nc));
+            }
+
+            return vssCredentials;
         }
 
         public static Task<WorkItem> GetWorkItem(string serverName, int workItemId)
