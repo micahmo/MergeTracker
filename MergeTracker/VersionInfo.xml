@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <AppUpdate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/micahmo/MergeTracker/master/MergeTracker/AppUpdate.xsd">
-  <Version>1.1.1.0</Version>
-  <ReleaseDate>2021-03-29</ReleaseDate>
+  <Version>1.1.2.0</Version>
+  <ReleaseDate>2023-03-16</ReleaseDate>
   <!-- Default download -->
-  <DownloadLink>https://github.com/micahmo/MergeTracker/releases/download/v1.1.1/MergeTracker.exe</DownloadLink>
+  <DownloadLink>https://github.com/micahmo/MergeTracker/releases/download/v1.1.2/MergeTracker.exe</DownloadLink>
   <DownloadFileName>MergeTracker.exe</DownloadFileName>
   <!-- All download options -->
   <Downloads>
     <Download key="portable">
-      <Link>https://github.com/micahmo/MergeTracker/releases/download/v1.1.1/MergeTracker.exe</Link>
+      <Link>https://github.com/micahmo/MergeTracker/releases/download/v1.1.2/MergeTracker.exe</Link>
       <FileName>MergeTracker.exe</FileName>
       <FileHash></FileHash>
     </Download>
   </Downloads>
   <!-- Release notes -->
-  <VersionNotes> - Add ability to authenticate with Azure DevOps cloud instance</VersionNotes>
+  <VersionNotes> - Bump LiteDB for CVE-2022-23535</VersionNotes>
   <ReleaseNotes></ReleaseNotes>
 </AppUpdate>
