@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -53,21 +54,17 @@ namespace MergeTracker
         {
             switch (e.PropertyName)
             {
-                case nameof(MergeTarget.BugNumber):
-                    GenerateName(sender as MergeTarget);
-                    break;
                 case nameof(MergeTarget.IsOriginal):
                     SetOriginal(sender as MergeTarget);
                     break;
             }
         }
 
-        private async void GenerateName(MergeTarget mergeTarget)
+        internal async Task GenerateName(MergeTarget mergeTarget)
         {
             try
             {
-                if (RootConfiguration.Instance.UseTfs &&
-                    Name == "New Merge Item" && mergeTarget?.IsOriginal == true && int.TryParse(mergeTarget.BugNumber, out int bugNumber))
+                if (mergeTarget?.IsOriginal == true && int.TryParse(mergeTarget.BugNumber, out int bugNumber))
                 {
                     Name = (await TfsUtils.GetWorkItem(mergeTarget.WorkItemServer, bugNumber))?.Fields["System.Title"]?.ToString() ?? Name;
                 }
@@ -148,6 +145,9 @@ namespace MergeTracker
         public ICommand DeleteCommand => _deleteCommand ??= new RelayCommand(Delete);
         private RelayCommand _deleteCommand;
 
+        public ICommand PopulateWorkItemNameCommand => _populateWorkItemCommand ??= new RelayCommand<DataGrid>(PopulateWorkItemName);
+        private RelayCommand<DataGrid> _populateWorkItemCommand;
+
         public ICommand DeleteMergeTargetCommand => _deleteMergeTargetCommand ??= new RelayCommand<DataGrid>(DeleteMergeTarget);
         private RelayCommand<DataGrid> _deleteMergeTargetCommand;
 
@@ -191,6 +191,14 @@ namespace MergeTracker
                 Model.MergeTargets.ToList().ForEach(t => DatabaseEngine.MergeTargetCollection.Delete(t.ObjectId));
                 DatabaseEngine.MergeItemCollection.Delete(Model.ObjectId);
                 MergeItem.OnMergeItemDeleted();
+            }
+        }
+
+        private async void PopulateWorkItemName(DataGrid dataGrid)
+        {
+            if (dataGrid.SelectedItem is MergeTarget mergeTarget)
+            {
+                await RootConfiguration.Instance.PerformMergeItemTaskAsync(async () => { await Model.GenerateName(mergeTarget); }, Model);
             }
         }
 

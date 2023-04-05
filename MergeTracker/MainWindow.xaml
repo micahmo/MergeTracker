@@ -106,9 +106,6 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" Text="Use TFS:" Margin="5" Padding="5"/>
-                    <CheckBox Grid.Column="1" IsChecked="{Binding RootConfiguration.UseTfs}" Margin="5" Padding="5" VerticalContentAlignment="Center"/>
-
                     <TextBlock Grid.Column="2" Text="TFS Username:" Margin="5" Padding="5"/>
                     <TextBox Grid.Column="3" Text="{Binding RootConfiguration.TfsUsername}" ToolTip="{Binding RootConfiguration.TfsUsername}" Margin="5" Padding="5"/>
 
@@ -229,6 +226,7 @@
                                 <local:MergeItemGrid.ColumnDefinitions>
                                     <ColumnDefinition Width="2*"/>
                                     <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="Auto"/>
@@ -251,16 +249,19 @@
                                     </xctk:RichTextBox.TextFormatter>
                                 </xctk:RichTextBox>
 
-                                <TextBlock Grid.Column="1" Grid.Row="0" Margin="5" Padding="5" Text="!!" FontSize="15"
-                                       ToolTip="{Binding LastError}" Visibility="{c:Binding HasLastError, FalseToVisibility=Collapsed}"/>
+                                <Button Grid.Column="1" Grid.Row="0" Margin="5" Padding="5" Content="◀"
+                                        ToolTip="Populate work item name" Command="{Binding Commands.PopulateWorkItemNameCommand}" CommandParameter="{Binding ElementName=DataGrid}"/>
 
-                                <Button Grid.Column="3" Grid.Row="0" Margin="5" Padding="5,0,5,0" Content="New Merge Target"
-                                    Command="{Binding Commands.CreateMergeTargetCommand}"/>
+                                <TextBlock Grid.Column="2" Grid.Row="0" Margin="5" Padding="5" Text="!!" FontSize="15"
+                                        ToolTip="{Binding LastError}" Visibility="{c:Binding HasLastError, FalseToVisibility=Collapsed}"/>
 
-                                <Button Grid.Column="4" Grid.Row="0" Margin="5" Padding="5,0,5,0" Content="Delete"
+                                <Button Grid.Column="4" Grid.Row="0" Margin="5" Padding="5,0,5,0" Content="New Merge Target"
+                                        Command="{Binding Commands.CreateMergeTargetCommand}"/>
+
+                                <Button Grid.Column="5" Grid.Row="0" Margin="5" Padding="5,0,5,0" Content="Delete"
                                     Command="{Binding Commands.DeleteCommand}"/>
 
-                                <local:MyDataGrid x:Name="DataGrid" Grid.Column="0" Grid.ColumnSpan="5" Grid.Row="1" Margin="5" ItemsSource="{Binding MergeTargets}" AutoGenerateColumns="False"
+                                <local:MyDataGrid x:Name="DataGrid" Grid.Column="0" Grid.ColumnSpan="6" Grid.Row="1" Margin="5" ItemsSource="{Binding MergeTargets}" AutoGenerateColumns="False"
                                         GridLinesVisibility="None" HeadersVisibility="Column" BorderThickness="0" CanUserAddRows="False"
                                         RowStyle="{StaticResource MergeTargetRowStyle}"
                                         PreviewKeyDown="DataGrid_PreviewKeyDown">

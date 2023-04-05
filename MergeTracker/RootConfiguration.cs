@@ -60,13 +60,6 @@ namespace MergeTracker
         }
         private bool _showTfsSettings;
 
-        public bool UseTfs
-        {
-            get => _useTfs;
-            set => Set(nameof(UseTfs), ref _useTfs, value);
-        }
-        private bool _useTfs;
-
         public string TfsUsername
         {
             get => _tfsUsername;
@@ -176,25 +169,22 @@ namespace MergeTracker
         {
             bool result = false;
 
-            if (UseTfs)
+            Mouse.OverrideCursor = Cursors.Wait;
+
+            try
             {
-                Mouse.OverrideCursor = Cursors.Wait;
-
-                try
-                {
-                    await taskToPerform();
-                    result = true;
-                }
-                catch (Exception ex)
-                {
-                    if (mergeItem is { })
-                    {
-                        mergeItem.LastError = $"There was an error performing the task.\n\n{ex}";
-                    }
-                }
-
-                Mouse.OverrideCursor = null;
+                await taskToPerform();
+                result = true;
             }
+            catch (Exception ex)
+            {
+                if (mergeItem is { })
+                {
+                    mergeItem.LastError = $"There was an error performing the task.\n\n{ex}";
+                }
+            }
+
+            Mouse.OverrideCursor = null;
 
             return result;
         }
