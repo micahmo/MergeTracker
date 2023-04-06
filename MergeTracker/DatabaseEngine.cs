@@ -17,7 +17,33 @@ namespace MergeTracker
                         Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), APPDATA_FOLDER_NAME));
                     }
 
-                    return new LiteDatabase(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), APPDATA_FOLDER_NAME, CONFIG_FILE_NAME));
+                    LiteDatabase database = new LiteDatabase(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), APPDATA_FOLDER_NAME, CONFIG_FILE_NAME));
+
+                    // Perform migrations
+                    if (database.UserVersion == 0)
+                    {
+                        ILiteCollection<BsonDocument> mergeTargets = database.GetCollection("mergetarget");
+                        foreach (BsonDocument mergeTarget in mergeTargets.FindAll())
+                        {
+                            mergeTarget["WorkItemId"] = mergeTarget["BugNumber"];
+                            mergeTarget["ChangesetId"] = mergeTarget["Changeset"];
+                            mergeTargets.Update(mergeTarget);
+                        }
+
+                        ILiteCollection<BsonDocument> rootConfigurations = database.GetCollection("rootconfiguration");
+                        foreach (BsonDocument rootConfiguration in rootConfigurations.FindAll())
+                        {
+                            rootConfiguration["ShowProjectSettings"] = rootConfiguration["ShowTfsSettings"];
+                            rootConfiguration["OnPremTfsUsername"] = rootConfiguration["TfsUsername"];
+                            rootConfiguration["OnPremTfsPassword"] = rootConfiguration["TfsPassword"];
+                            rootConfiguration["CloudAzureDevOpsToken"] = rootConfiguration["TfsToken"];
+                            rootConfigurations.Update(rootConfiguration);
+                        }
+
+                        database.UserVersion = 1;
+                    }
+
+                    return database;
                 })();
             }
         }
