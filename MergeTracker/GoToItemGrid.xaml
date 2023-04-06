@@ -73,6 +73,7 @@
 
             <TextBlock x:Name="ErrorTextBox" Text="Error accessing item!" Foreground="Red" Margin="5"
                        Visibility="{c:Binding ErrorOpeningItem, FalseToVisibility=Collapsed}"
+                       ToolTip="{Binding ErrorOpeningItemToolTip}"
                        IsVisibleChanged="ErrorTextBlock_IsVisibleChanged"/>
 
             <Button Grid.Column="2" Margin="5" Padding="5" MinWidth="50" Content="Copy URL"

@@ -42,6 +42,11 @@ namespace MergeTracker
         private static ILiteCollection<MergeTarget> _mergeTargetCollection;
 
         private const string CONFIG_FILE_NAME = "MergeTracker.db";
+
+#if DEBUG
+        private const string APPDATA_FOLDER_NAME = "MergeTracker_Debug";
+#else
         private const string APPDATA_FOLDER_NAME = "MergeTracker";
+#endif
     }
 }

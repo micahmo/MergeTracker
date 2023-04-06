@@ -89,9 +89,9 @@ namespace MergeTracker
             DatabaseEngine.Shutdown();
         }
 
-        private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+        private void OnPremTfsPasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
         {
-            Model.RootConfiguration.TfsPassword = TfsPasswordBox.Password;
+            Model.RootConfiguration.OnPremTfsPassword = OnPremTfsPasswordBox.Password;
         }
 
         private void ReloadCommand_Executed(object sender, ExecutedRoutedEventArgs e)
@@ -103,9 +103,16 @@ namespace MergeTracker
         {
             // First, check if there is any selected text. We want this to become the seed for the GoTo box
 
+            // Try regular TextBox
             IInputElement focusedControl = FocusManager.GetFocusedElement(this);
             var selectedTextProperty = focusedControl?.GetType().GetProperty(nameof(TextBox.SelectedText), BindingFlags.Instance | BindingFlags.Public);
             var textValue = selectedTextProperty?.GetValue(focusedControl) as string;
+
+            // Try RichTextBox
+            if (focusedControl is Xctk.RichTextBox richTextBox)
+            {
+                textValue = richTextBox.Selection.Text;
+            }
 
             if (string.IsNullOrEmpty(textValue) == false)
             {
@@ -133,16 +140,13 @@ namespace MergeTracker
                     
                     switch (bindingPath)
                     {
-                        case nameof(MergeTarget.BugNumber):
-                            if (int.TryParse(mergeTarget.BugNumber, out int bugNumber))
-                            {
-                                await Model.RootConfiguration.OpenBug(mergeTarget.WorkItemServer, bugNumber, mergeItem);
-                            }
+                        case nameof(MergeTarget.WorkItemId):
+                            await Model.RootConfiguration.OpenWorkItem(mergeTarget.WorkItemServer, mergeTarget.WorkItemId, mergeItem);
                             break;
-                        case nameof(mergeTarget.Changeset):
-                            if (string.IsNullOrEmpty(mergeTarget.Changeset) == false)
+                        case nameof(mergeTarget.ChangesetId):
+                            if (string.IsNullOrEmpty(mergeTarget.ChangesetId) == false)
                             {
-                                await Model.RootConfiguration.OpenChangeset(mergeTarget.SourceControlServer, mergeTarget.Changeset, mergeItem);
+                                await Model.RootConfiguration.OpenChangeset(mergeTarget.SourceControlServer, mergeTarget.ChangesetId, mergeItem);
                             }
                             break;
                         default:
@@ -215,6 +219,16 @@ namespace MergeTracker
             }.ShowDialog();
         }
 
+        public void DefaultWorkItemServerItem_Clicked(object sender, EventArgs e)
+        {
+            RootConfiguration.Instance.DefaultWorkItemServer = ((sender as MenuItem).DataContext as ServerItem).ServerName;
+        }
+
+        public void DefaultSourceControlServerItem_Clicked(object sender, EventArgs e)
+        {
+            RootConfiguration.Instance.DefaultSourceControlServer = ((sender as MenuItem).DataContext as ServerItem).ServerName;
+        }
+
         #region Private fields
 
         private readonly WpfUpdateChecker _updateChecker;
@@ -264,6 +278,13 @@ namespace MergeTracker
         }
         private bool _errorOpeningItem;
 
+        public string ErrorOpeningItemToolTip
+        {
+            get => _errorOpeningItemToolTip;
+            set => Set(nameof(ErrorOpeningItemToolTip), ref _errorOpeningItemToolTip, value);
+        }
+        private string _errorOpeningItemToolTip;
+
         public IEnumerable<ItemType> ItemTypes => Enum.GetValues(typeof(ItemType)).OfType<ItemType>();
     }
 
@@ -275,6 +296,9 @@ namespace MergeTracker
 
         public ICommand CreateMergeItemCommand => _createMergeItemCommand ??= new RelayCommand(CreateMergeItem);
         private RelayCommand _createMergeItemCommand;
+
+        public ICommand ShowDefaultServersMenuCommand => _showDefaultServersMenuCommand ??= new RelayCommand<Button>(ShowDefaultServersMenu);
+        private RelayCommand<Button> _showDefaultServersMenuCommand;
 
         public ICommand ReloadMergeItemsCommand => _reloadMergeItemsCommand ??= new RelayCommand(ReloadMergeItems);
         private RelayCommand _reloadMergeItemsCommand;
@@ -297,8 +321,8 @@ namespace MergeTracker
         public ICommand ShowMergeTargetContextMenuCommand => _showMergeItemContextMenuCommand ??= new RelayCommand<DataGridRow>(ShowMergeTargetContextMenu);
         private RelayCommand<DataGridRow> _showMergeItemContextMenuCommand;
 
-        public ICommand ToggleTfsSettingsVisibilityCommand => _toggleTfsSettingsVisibilityCommand ??= new RelayCommand(ToggleTfsSettingsVisibility);
-        private RelayCommand _toggleTfsSettingsVisibilityCommand;
+        public ICommand ToggleProjectSettingsVisibilityCommand => _toggleProjectSettingsVisibilityCommand ??= new RelayCommand(ToggleProjectSettingsVisibility);
+        private RelayCommand _toggleProjectSettingsVisibilityCommand;
 
         private void CreateMergeItem()
         {
@@ -313,6 +337,18 @@ namespace MergeTracker
             mergeItem.Save();
 
             ReloadMergeItems();
+        }
+
+        private void ShowDefaultServersMenu(Button button)
+        {
+            if (button.ContextMenu != null)
+            {
+                // Important: Must initialize PlacementTarget before showing ContextMenu,
+                // otherwise binding will not be able to resolve.
+                button.ContextMenu.PlacementTarget = button;
+
+                button.ContextMenu.IsOpen = true;
+            }
         }
 
         private void ReloadMergeItems()
@@ -365,8 +401,8 @@ namespace MergeTracker
             if (string.IsNullOrEmpty(Model.RootConfiguration.Filter) == false)
             {
                 subQueryPredicate = subQueryPredicate.Or(i =>
-                    i.MergeTargets.Select(t => t.BugNumber).Any(bn => bn.Contains(Model.RootConfiguration.Filter)) ||
-                    i.MergeTargets.Select(t => t.Changeset).Any(cs => cs.Contains(Model.RootConfiguration.Filter)) ||
+                    i.MergeTargets.Select(t => t.WorkItemId).Any(bn => bn.Contains(Model.RootConfiguration.Filter)) ||
+                    i.MergeTargets.Select(t => t.ChangesetId).Any(cs => cs.Contains(Model.RootConfiguration.Filter)) ||
                     i.MergeTargets.Select(t => t.TargetBranch).Any(tb => tb.Contains(Model.RootConfiguration.Filter)));
             }
 
@@ -391,6 +427,7 @@ namespace MergeTracker
         {
             Model.ShowGoToItemPrompt = true;
             Model.ErrorOpeningItem = false;
+            Model.ErrorOpeningItemToolTip = default;
         }
 
         private async void GoToItem()
@@ -399,34 +436,33 @@ namespace MergeTracker
             {
                 Model.GoingToItem = true;
                 Model.ErrorOpeningItem = false;
+                Model.ErrorOpeningItemToolTip = default;
 
-                bool success = false;
+                string error = default;
 
                 switch (Model.RootConfiguration.SelectedItemType)
                 {
                     case ItemType.WorkItem:
-                        if (int.TryParse(Model.RootConfiguration.SelectedItemId, out int bugNumber))
-                        {
-                            success = await Model.RootConfiguration.OpenBug(Model.RootConfiguration.SelectedWorkItemServer, bugNumber);
-                        }
+                        error = await Model.RootConfiguration.OpenWorkItem(Model.RootConfiguration.SelectedWorkItemServer, Model.RootConfiguration.SelectedItemId);
                         break;
                     case ItemType.Changeset:
                         if (string.IsNullOrEmpty(Model.RootConfiguration.SelectedItemId) == false)
                         {
-                            success = await Model.RootConfiguration.OpenChangeset(Model.RootConfiguration.SelectedSourceControlServer, Model.RootConfiguration.SelectedItemId);
+                            error = await Model.RootConfiguration.OpenChangeset(Model.RootConfiguration.SelectedSourceControlServer, Model.RootConfiguration.SelectedItemId);
                         }
                         break;
                     default:
                         break;
                 }
 
-                if (success)
+                if (string.IsNullOrEmpty(error))
                 {
                     Model.ShowGoToItemPrompt = false;
                 }
                 else
                 {
                     Model.ErrorOpeningItem = true;
+                    Model.ErrorOpeningItemToolTip = error;
                 }
 
                 Model.GoingToItem = false;
@@ -442,22 +478,19 @@ namespace MergeTracker
         {
             Model.GoingToItem = true;
             Model.ErrorOpeningItem = false;
+            Model.ErrorOpeningItemToolTip = default;
 
-            bool success = false;
+            string error = default;
 
             switch (Model.RootConfiguration.SelectedItemType)
             {
                 case ItemType.WorkItem:
-                    if (int.TryParse(Model.RootConfiguration.SelectedItemId, out int bugNumber))
-                    {
-                        success = await Model.RootConfiguration.CopyBugUrl(Model.RootConfiguration.SelectedWorkItemServer, bugNumber);
-                    }
-
+                    error = await Model.RootConfiguration.CopyWorkItemUrl(Model.RootConfiguration.SelectedWorkItemServer, Model.RootConfiguration.SelectedItemId);
                     break;
                 case ItemType.Changeset:
                     if (string.IsNullOrEmpty(Model.RootConfiguration.SelectedItemId) == false)
                     {
-                        success = await Model.RootConfiguration.CopyChangesetOrCommitUrl(Model.RootConfiguration.SelectedSourceControlServer, Model.RootConfiguration.SelectedItemId);
+                        error = await Model.RootConfiguration.CopyChangesetUrl(Model.RootConfiguration.SelectedSourceControlServer, Model.RootConfiguration.SelectedItemId);
                     }
 
                     break;
@@ -465,13 +498,14 @@ namespace MergeTracker
                     break;
             }
 
-            if (success)
+            if (string.IsNullOrEmpty(error))
             {
                 Model.ShowGoToItemPrompt = false;
             }
             else
             {
                 Model.ErrorOpeningItem = true;
+                Model.ErrorOpeningItemToolTip = error;
             }
 
             Model.GoingToItem = false;
@@ -496,9 +530,9 @@ namespace MergeTracker
             }
         }
 
-        private void ToggleTfsSettingsVisibility()
+        private void ToggleProjectSettingsVisibility()
         {
-            Model.RootConfiguration.ShowTfsSettings = !Model.RootConfiguration.ShowTfsSettings;
+            Model.RootConfiguration.ShowProjectSettings = !Model.RootConfiguration.ShowProjectSettings;
         }
     }
 }

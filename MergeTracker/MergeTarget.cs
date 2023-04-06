@@ -18,19 +18,19 @@ namespace MergeTracker
         }
         private string _targetBranch;
 
-        public string BugNumber
+        public string WorkItemId
         {
-            get => _bugNumber;
-            set => Set(nameof(BugNumber), ref _bugNumber, value);
+            get => _workItemId;
+            set => Set(nameof(WorkItemId), ref _workItemId, value);
         }
-        private string _bugNumber;
+        private string _workItemId;
 
-        public string Changeset
+        public string ChangesetId
         {
-            get => _changeset;
-            set => Set(nameof(Changeset), ref _changeset, value);
+            get => _changesetId;
+            set => Set(nameof(ChangesetId), ref _changesetId, value);
         }
-        private string _changeset;
+        private string _changesetId;
 
         public bool IsOriginal
         {
@@ -61,15 +61,25 @@ namespace MergeTracker
         public string WorkItemServer
         {
             get => _workItemServer ?? RootConfiguration.Instance.DefaultWorkItemServer;
-            set => Set(nameof(WorkItemServer), ref _workItemServer, value);
+            set
+            {
+                Set(nameof(WorkItemServer), ref _workItemServer, value);
+                RaisePropertyChanged(nameof(ServersToolTip));
+            }
         }
+
         private string _workItemServer;
 
         public string SourceControlServer
         {
             get => _sourceControlSerer ?? RootConfiguration.Instance.DefaultSourceControlServer;
-            set => Set(nameof(SourceControlServer), ref _sourceControlSerer, value);
+            set
+            {
+                Set(nameof(SourceControlServer), ref _sourceControlSerer, value);
+                RaisePropertyChanged(nameof(ServersToolTip));
+            }
         }
+
         private string _sourceControlSerer;
 
         [BsonIgnore]
@@ -78,16 +88,19 @@ namespace MergeTracker
         [BsonIgnore]
         public IEnumerable<ServerItem> SourceControlServers => RootConfiguration.Instance.SourceControlServers?.Select(s => new SourceControlServerItem { ServerName = s, IsSelected = s == SourceControlServer, MergeTarget = this });
 
+        [BsonIgnore]
+        public string ServersToolTip => $"Work Item Server: {WorkItemServer}\nSource Control Server: {SourceControlServer}";
+
         public void GenerateCheckinNote(MergeItem mergeItem)
         {
-            string originalBugNumber = mergeItem.MergeTargets.FirstOrDefault(t => t.IsOriginal)?.BugNumber;
+            string originalWorkItemId = mergeItem.MergeTargets.FirstOrDefault(t => t.IsOriginal)?.WorkItemId;
             string originalVersionNumber = mergeItem.MergeTargets.FirstOrDefault(t => t.IsOriginal)?.TargetBranch;
 
             string result = RootConfiguration.Instance.CheckInMessage
-                .Replace("%o", originalBugNumber)
+                .Replace("%o", originalWorkItemId)
                 .Replace("%v", originalVersionNumber)
                 .Replace("%b", TargetBranch)
-                .Replace("%t", BugNumber);
+                .Replace("%t", WorkItemId);
 
             Clipboard.SetData(DataFormats.Text, result);
         }

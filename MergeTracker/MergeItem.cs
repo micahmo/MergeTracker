@@ -64,9 +64,9 @@ namespace MergeTracker
         {
             try
             {
-                if (mergeTarget?.IsOriginal == true && int.TryParse(mergeTarget.BugNumber, out int bugNumber))
+                if (mergeTarget?.IsOriginal == true)
                 {
-                    Name = (await TfsUtils.GetWorkItem(mergeTarget.WorkItemServer, bugNumber))?.Fields["System.Title"]?.ToString() ?? Name;
+                    Name = await RootConfiguration.Instance.GetWorkItemServer(mergeTarget.WorkItemServer).GetWorkItemTitle(mergeTarget.WorkItemId) ?? Name;
                 }
             }
             catch (Exception ex)
@@ -151,11 +151,11 @@ namespace MergeTracker
         public ICommand DeleteMergeTargetCommand => _deleteMergeTargetCommand ??= new RelayCommand<DataGrid>(DeleteMergeTarget);
         private RelayCommand<DataGrid> _deleteMergeTargetCommand;
 
-        public ICommand CopyBugNumberCommand => _copyBugNumberCommand ??= new RelayCommand<DataGrid>(CopyBugNumber);
-        private RelayCommand<DataGrid> _copyBugNumberCommand;
+        public ICommand CopyWorkItemIdCommand => _copyWorkItemIdCommand ??= new RelayCommand<DataGrid>(CopyWorkItemId);
+        private RelayCommand<DataGrid> _copyWorkItemIdCommand;
 
-        public ICommand OpenBugCommand => _openBugCommand ??= new RelayCommand<DataGrid>(OpenBug);
-        private RelayCommand<DataGrid> _openBugCommand;
+        public ICommand OpenWorkItemCommand => _openWorkItemCommand ??= new RelayCommand<DataGrid>(OpenWorkItem);
+        private RelayCommand<DataGrid> _openWorkItemCommand;
 
         public ICommand CopyChangesetCommand => _copyChangesetCommand ??= new RelayCommand<DataGrid>(CopyChangeset);
         private RelayCommand<DataGrid> _copyChangesetCommand;
@@ -202,35 +202,35 @@ namespace MergeTracker
             }
         }
 
-        private void CopyBugNumber(DataGrid dataGrid)
+        private void CopyWorkItemId(DataGrid dataGrid)
         {
-            if (dataGrid.SelectedItem is MergeTarget mergeTarget && string.IsNullOrEmpty(mergeTarget.BugNumber) == false)
+            if (dataGrid.SelectedItem is MergeTarget mergeTarget && string.IsNullOrEmpty(mergeTarget.WorkItemId) == false)
             {
-                Clipboard.SetData(DataFormats.Text, mergeTarget.BugNumber);
+                Clipboard.SetData(DataFormats.Text, mergeTarget.WorkItemId);
             }
         }
 
-        private async void OpenBug(DataGrid dataGrid)
+        private async void OpenWorkItem(DataGrid dataGrid)
         {
-            if (dataGrid.SelectedItem is MergeTarget mergeTarget && int.TryParse(mergeTarget.BugNumber, out int bugNumber))
+            if (dataGrid.SelectedItem is MergeTarget mergeTarget)
             {
-                await RootConfiguration.Instance.OpenBug(mergeTarget.WorkItemServer, bugNumber, Model);
+                await RootConfiguration.Instance.OpenWorkItem(mergeTarget.WorkItemServer, mergeTarget.WorkItemId, Model);
             }
         }
 
         private void CopyChangeset(DataGrid dataGrid)
         {
-            if (dataGrid.SelectedItem is MergeTarget mergeTarget && string.IsNullOrEmpty(mergeTarget.Changeset) == false)
+            if (dataGrid.SelectedItem is MergeTarget mergeTarget && string.IsNullOrEmpty(mergeTarget.ChangesetId) == false)
             {
-                Clipboard.SetData(DataFormats.Text, mergeTarget.Changeset);
+                Clipboard.SetData(DataFormats.Text, mergeTarget.ChangesetId);
             }
         }
 
         private async void OpenChangeset(DataGrid dataGrid)
         {
-            if (dataGrid.SelectedItem is MergeTarget mergeTarget && string.IsNullOrEmpty(mergeTarget.Changeset) == false)
+            if (dataGrid.SelectedItem is MergeTarget mergeTarget && string.IsNullOrEmpty(mergeTarget.ChangesetId) == false)
             {
-                await RootConfiguration.Instance.OpenChangeset(mergeTarget.SourceControlServer, mergeTarget.Changeset, Model);
+                await RootConfiguration.Instance.OpenChangeset(mergeTarget.SourceControlServer, mergeTarget.ChangesetId, Model);
             }
         }
 
