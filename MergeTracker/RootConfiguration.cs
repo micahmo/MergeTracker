@@ -16,6 +16,11 @@ namespace MergeTracker
         public RootConfiguration()
         {
             PropertyChanged += RootConfiguration_PropertyChanged;
+
+            MergeItems.CollectionChanged += (_, __) =>
+            {
+                RaisePropertyChanged(nameof(MergeItemsCountString));
+            };
         }
 
         private void RootConfiguration_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -38,6 +43,21 @@ namespace MergeTracker
 
         [BsonIgnore]
         public ObservableCollection<MergeItem> MergeItems { get; set; } = new ObservableCollection<MergeItem>();
+
+        [BsonIgnore]
+        public int MergeItemsTotalCount
+        {
+            get => _mergeItemsTotalCount;
+            set
+            {
+                _mergeItemsTotalCount = value;
+                RaisePropertyChanged(nameof(MergeItemsCountString));
+            }
+        }
+        private int _mergeItemsTotalCount;
+        
+        [BsonIgnore]
+        public string MergeItemsCountString => $"Count: {MergeItems.Count}{(MergeItems.Count != MergeItemsTotalCount ? $" (filtered from: {MergeItemsTotalCount})" : string.Empty)}";
 
         public string Filter
         {

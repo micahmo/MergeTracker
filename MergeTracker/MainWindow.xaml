@@ -46,8 +46,7 @@
             <StatusBar DockPanel.Dock="Bottom" >
                 <StatusBarItem HorizontalAlignment="Right">
                     <StackPanel Orientation="Horizontal" Margin="0,0,20,0">
-                        <TextBlock Text="Count: "/>
-                        <TextBlock Text="{Binding RootConfiguration.MergeItems.Count}"/>
+                        <TextBlock Text="{Binding RootConfiguration.MergeItemsCountString}"/>
                     </StackPanel>
                 </StatusBarItem>
             </StatusBar>

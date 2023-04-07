@@ -410,10 +410,12 @@ namespace MergeTracker
             using (new WaitCursor(Cursors.Wait, DispatcherPriority.Loaded))
             {
                 Model.RootConfiguration.MergeItems.Clear();
+                Model.RootConfiguration.MergeItemsTotalCount = 0;
 
                 try
                 {
                     mergeItems.Query().Where(queryPredicate.And(subQueryPredicate)).OrderByDescending(i => i.ObjectId).ToList().ForEach(i => Model.RootConfiguration.MergeItems.Add(i));
+                    Model.RootConfiguration.MergeItemsTotalCount = mergeItems.Count();
                 }
                 catch (LiteException)
                 {
