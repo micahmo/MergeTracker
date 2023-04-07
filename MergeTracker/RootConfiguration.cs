@@ -317,7 +317,10 @@ namespace MergeTracker
         {
             return PerformMergeItemTaskAsync(async () =>
             {
-                await GetWorkItemServer(workItemServer).OpenWorkItem(workItemId);
+                foreach (string workItemIdString in workItemId.Split(new[] { ",", ";" }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    await GetWorkItemServer(workItemServer).OpenWorkItem(workItemIdString);
+                }
             }, mergeItem);
         }
 
