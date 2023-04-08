@@ -16,9 +16,7 @@ namespace MergeTracker
 
         public async Task<string> GetChangesetUrl(string changesetId)
         {
-            var url = (await GetClient().Git.Commit.Get(Org, Repository, changesetId)).Url;
-            url = url.Replace("api.", string.Empty).Replace("repos/", string.Empty).Replace("git/", string.Empty).Replace("commits/", "commit/");
-            return url;
+            return (await GetClient().Repository.Commit.Get(Org, Repository, changesetId)).HtmlUrl;
         }
 
         private GitHubClient GetClient()
