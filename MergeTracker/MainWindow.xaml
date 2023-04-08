@@ -490,7 +490,7 @@
 
                                                         <xctk:RichTextBox Grid.Column="0" Margin="5,0,0,0" Height="20" ToolTip="{Binding ChangesetId}"
                                                                       Text="{Binding ChangesetId, UpdateSourceTrigger=PropertyChanged,
-                                                                      Converter={StaticResource HighlightedTextConverter}, ConverterParameter=Changeset}"
+                                                                      Converter={StaticResource HighlightedTextConverter}, ConverterParameter=ChangesetId}"
                                                                       AcceptsReturn="False" LostFocus="RichTextBox_LostFocus">
                                                             <xctk:RichTextBox.TextFormatter>
                                                                 <xctk:XamlFormatter />

@@ -403,7 +403,8 @@ namespace MergeTracker
                 subQueryPredicate = subQueryPredicate.Or(i =>
                     i.MergeTargets.Select(t => t.WorkItemId).Any(bn => bn.Contains(Model.RootConfiguration.Filter)) ||
                     i.MergeTargets.Select(t => t.ChangesetId).Any(cs => cs.Contains(Model.RootConfiguration.Filter)) ||
-                    i.MergeTargets.Select(t => t.TargetBranch).Any(tb => tb.Contains(Model.RootConfiguration.Filter)));
+                    i.MergeTargets.Select(t => t.TargetBranch).Any(tb => tb.Contains(Model.RootConfiguration.Filter)) ||
+                    i.MergeTargets.Select(t => t.Notes).Any(notes => notes.Contains(Model.RootConfiguration.Filter)));
             }
 
             // Use a wait cursor with a specific dispatcher priority, so that we can ensure that it doesn't change until the UI is responsive
