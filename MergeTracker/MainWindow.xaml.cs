@@ -105,13 +105,29 @@ namespace MergeTracker
 
             // Try regular TextBox
             IInputElement focusedControl = FocusManager.GetFocusedElement(this);
-            var selectedTextProperty = focusedControl?.GetType().GetProperty(nameof(TextBox.SelectedText), BindingFlags.Instance | BindingFlags.Public);
-            var textValue = selectedTextProperty?.GetValue(focusedControl) as string;
+            PropertyInfo selectedTextProperty = focusedControl?.GetType().GetProperty(nameof(TextBox.SelectedText), BindingFlags.Instance | BindingFlags.Public);
+            string textValue = selectedTextProperty?.GetValue(focusedControl) as string;
 
             // Try RichTextBox
             if (focusedControl is Xctk.RichTextBox richTextBox)
             {
                 textValue = richTextBox.Selection.Text;
+            }
+
+            // See if this control has a parent MergeTarget
+            if (focusedControl is FrameworkElement { DataContext: MergeTarget mergeTarget } frameworkElement)
+            {
+                // Figure out of this is a WorkItem or Changeset
+                if (frameworkElement.Tag?.ToString() == nameof(MergeTarget.WorkItemId))
+                {
+                    Model.RootConfiguration.SelectedWorkItemServer = mergeTarget.WorkItemServer;
+                    Model.RootConfiguration.SelectedItemType = ItemType.WorkItem;
+                }
+                else if (frameworkElement.Tag?.ToString() == nameof(MergeTarget.ChangesetId))
+                {
+                    Model.RootConfiguration.SelectedSourceControlServer = mergeTarget.SourceControlServer;
+                    Model.RootConfiguration.SelectedItemType = ItemType.Changeset;
+                }
             }
 
             if (string.IsNullOrEmpty(textValue) == false)

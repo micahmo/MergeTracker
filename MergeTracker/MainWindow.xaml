@@ -445,7 +445,8 @@
                                                         <xctk:RichTextBox Grid.Column="0" Margin="5,0,0,0" Height="20" ToolTip="{Binding WorkItemId}"
                                                                       Text="{Binding WorkItemId, UpdateSourceTrigger=PropertyChanged,
                                                                       Converter={StaticResource HighlightedTextConverter}, ConverterParameter=WorkItemId}"
-                                                                      AcceptsReturn="False" LostFocus="RichTextBox_LostFocus">
+                                                                      AcceptsReturn="False" LostFocus="RichTextBox_LostFocus"
+                                                                      Tag="WorkItemId">
                                                             <xctk:RichTextBox.TextFormatter>
                                                                 <xctk:XamlFormatter />
                                                             </xctk:RichTextBox.TextFormatter>
@@ -491,7 +492,8 @@
                                                         <xctk:RichTextBox Grid.Column="0" Margin="5,0,0,0" Height="20" ToolTip="{Binding ChangesetId}"
                                                                       Text="{Binding ChangesetId, UpdateSourceTrigger=PropertyChanged,
                                                                       Converter={StaticResource HighlightedTextConverter}, ConverterParameter=ChangesetId}"
-                                                                      AcceptsReturn="False" LostFocus="RichTextBox_LostFocus">
+                                                                      AcceptsReturn="False" LostFocus="RichTextBox_LostFocus"
+                                                                      Tag="ChangesetId">
                                                             <xctk:RichTextBox.TextFormatter>
                                                                 <xctk:XamlFormatter />
                                                             </xctk:RichTextBox.TextFormatter>
