@@ -12,12 +12,12 @@ namespace MergeTracker
             {
                 return _databaseInstance ??= new Func<LiteDatabase>(() =>
                 {
-                    if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), APPDATA_FOLDER_NAME)))
+                    if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), AppSettings.Instance.AppDataFolderName)))
                     {
-                        Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), APPDATA_FOLDER_NAME));
+                        Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), AppSettings.Instance.AppDataFolderName));
                     }
 
-                    LiteDatabase database = new LiteDatabase(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), APPDATA_FOLDER_NAME, CONFIG_FILE_NAME));
+                    LiteDatabase database = new LiteDatabase(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), AppSettings.Instance.AppDataFolderName, CONFIG_FILE_NAME));
 
                     // Perform migrations
                     if (database.UserVersion == 0)
@@ -68,11 +68,5 @@ namespace MergeTracker
         private static ILiteCollection<MergeTarget> _mergeTargetCollection;
 
         private const string CONFIG_FILE_NAME = "MergeTracker.db";
-
-#if DEBUG
-        private const string APPDATA_FOLDER_NAME = "MergeTracker_Debug";
-#else
-        private const string APPDATA_FOLDER_NAME = "MergeTracker";
-#endif
     }
 }

@@ -60,6 +60,13 @@ namespace MergeTracker
             };
         }
 
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+
+            AppSettings.Instance.Tracker.Track(this);
+        }
+
         private void MergeItem_MergeItemDeleted(object sender, EventArgs e)
         {
             Model.Commands.ReloadMergeItemsCommand.Execute(null);
