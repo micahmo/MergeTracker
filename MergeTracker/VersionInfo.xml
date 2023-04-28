@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <AppUpdate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/micahmo/MergeTracker/master/MergeTracker/AppUpdate.xsd">
-  <Version>2.0.2.0</Version>
-  <ReleaseDate>2023-04-14</ReleaseDate>
+  <Version>2.0.3.0</Version>
+  <ReleaseDate>2023-04-28</ReleaseDate>
   <!-- Default download -->
-  <DownloadLink>https://github.com/micahmo/MergeTracker/releases/download/v2.0.2/MergeTracker.exe</DownloadLink>
+  <DownloadLink>https://github.com/micahmo/MergeTracker/releases/download/v2.0.3/MergeTracker.exe</DownloadLink>
   <DownloadFileName>MergeTracker.exe</DownloadFileName>
   <!-- All download options -->
   <Downloads>
     <Download key="portable">
-      <Link>https://github.com/micahmo/MergeTracker/releases/download/v2.0.2/MergeTracker.exe</Link>
+      <Link>https://github.com/micahmo/MergeTracker/releases/download/v2.0.3/MergeTracker.exe</Link>
       <FileName>MergeTracker.exe</FileName>
       <FileHash></FileHash>
     </Download>
   </Downloads>
   <!-- Release notes -->
-  <VersionNotes> - Save/load window states</VersionNotes>
+  <VersionNotes> - Show date/time when merge entry was created</VersionNotes>
   <ReleaseNotes></ReleaseNotes>
 </AppUpdate>
