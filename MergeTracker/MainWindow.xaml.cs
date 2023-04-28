@@ -349,7 +349,7 @@ namespace MergeTracker
 
         private void CreateMergeItem()
         {
-            MergeItem mergeItem = new MergeItem {Name = "New Merge Item"};
+            MergeItem mergeItem = new MergeItem {Name = "New Merge Item", CreatedDateTimeTime = DateTimeOffset.Now};
             DatabaseEngine.MergeItemCollection.Insert(mergeItem);
 
             MergeTarget mergeTarget = new MergeTarget {IsOriginal = true, IsCompleted = false};

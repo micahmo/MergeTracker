@@ -1,90 +1,101 @@
-﻿<Window x:Class="MergeTracker.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:MergeTracker"
-        xmlns:c="clr-namespace:CalcBinding;assembly=CalcBinding"
-        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-        xmlns:dataConverters="clr-namespace:MergeTracker.DataConverters"
-        mc:Ignorable="d"
-        d:DataContext="{d:DesignInstance Type=local:MainWindowModel}"
-        Title="Merge Tracker" Height="800" Width="1500"
-        Icon="icon.ico"
-        Closing="Window_Closing"
-        SizeChanged="Window_SizeChanged"
-        KeyDown="Window_KeyDown"
-        Loaded="Window_Loaded">
+﻿<Window
+    x:Class="MergeTracker.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="clr-namespace:CalcBinding;assembly=CalcBinding"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dataConverters="clr-namespace:MergeTracker.DataConverters"
+    xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+    xmlns:local="clr-namespace:MergeTracker"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+    Title="Merge Tracker"
+    Width="1500"
+    Height="800"
+    d:DataContext="{d:DesignInstance Type=local:MainWindowModel}"
+    Closing="Window_Closing"
+    Icon="icon.ico"
+    KeyDown="Window_KeyDown"
+    Loaded="Window_Loaded"
+    SizeChanged="Window_SizeChanged"
+    mc:Ignorable="d">
 
     <Window.CommandBindings>
-        <CommandBinding Command="{x:Static local:ShortcutCommands.ReloadCommand}" Executed="ReloadCommand_Executed"/>
-        <CommandBinding Command="{x:Static local:ShortcutCommands.GoToItemCommand}" Executed="GoToItemCommand_Executed"/>
-        <CommandBinding Command="{x:Static local:ShortcutCommands.FindCommand}" Executed="FindCommand_Executed"/>
-        <CommandBinding Command="{x:Static local:ShortcutCommands.AboutBoxCommand}" Executed="AboutBoxCommand_Executed"/>
+        <CommandBinding Command="{x:Static local:ShortcutCommands.ReloadCommand}" Executed="ReloadCommand_Executed" />
+        <CommandBinding Command="{x:Static local:ShortcutCommands.GoToItemCommand}" Executed="GoToItemCommand_Executed" />
+        <CommandBinding Command="{x:Static local:ShortcutCommands.FindCommand}" Executed="FindCommand_Executed" />
+        <CommandBinding Command="{x:Static local:ShortcutCommands.AboutBoxCommand}" Executed="AboutBoxCommand_Executed" />
     </Window.CommandBindings>
 
     <Window.Resources>
-        <dataConverters:HighlightedTextConverter x:Key="HighlightedTextConverter"/>
+        <dataConverters:HighlightedTextConverter x:Key="HighlightedTextConverter" />
     </Window.Resources>
 
     <xctk:BusyIndicator IsBusy="{Binding ShowGoToItemPrompt}">
-        <!-- Hide the default progress bar so we can completely stylize this overlay -->
+        <!--  Hide the default progress bar so we can completely stylize this overlay  -->
         <xctk:BusyIndicator.ProgressBarStyle>
             <Style TargetType="ProgressBar">
-                <Setter Property="Visibility" Value="Collapsed"/>
+                <Setter Property="Visibility" Value="Collapsed" />
             </Style>
         </xctk:BusyIndicator.ProgressBarStyle>
 
         <xctk:BusyIndicator.BusyContentTemplate>
             <DataTemplate>
-                <local:GoToItemGrid DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=local:MainWindow}}"/>
+                <local:GoToItemGrid DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=local:MainWindow}}" />
             </DataTemplate>
         </xctk:BusyIndicator.BusyContentTemplate>
 
         <DockPanel>
-            <StatusBar DockPanel.Dock="Bottom" >
+            <StatusBar DockPanel.Dock="Bottom">
                 <StatusBarItem HorizontalAlignment="Right">
-                    <StackPanel Orientation="Horizontal" Margin="0,0,20,0">
-                        <TextBlock Text="{Binding RootConfiguration.MergeItemsCountString}"/>
+                    <StackPanel Margin="0,0,20,0" Orientation="Horizontal">
+                        <TextBlock Text="{Binding RootConfiguration.MergeItemsCountString}" />
                     </StackPanel>
                 </StatusBarItem>
             </StatusBar>
 
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition/>
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition />
                 </Grid.RowDefinitions>
 
                 <Grid Grid.Row="0">
                     <Grid.Resources>
                         <ContextMenu x:Key="DefaultServersContextMenu" d:DataContext="{d:DesignInstance Type=Button}">
-                            <MenuItem Header="Default Work Item Server" IsCheckable="False" ItemsSource="{Binding RootConfiguration.WorkItemServersBinding}" IsEnabled="{Binding RootConfiguration.HasAnyWorkItemServers}">
+                            <MenuItem
+                                Header="Default Work Item Server"
+                                IsCheckable="False"
+                                IsEnabled="{Binding RootConfiguration.HasAnyWorkItemServers}"
+                                ItemsSource="{Binding RootConfiguration.WorkItemServersBinding}">
                                 <MenuItem.ItemContainerStyle>
                                     <Style TargetType="MenuItem">
-                                        <Setter Property="IsChecked" Value="{Binding IsSelected}"/>
-                                        <EventSetter Event="Click" Handler="DefaultWorkItemServerItem_Clicked"/>
+                                        <Setter Property="IsChecked" Value="{Binding IsSelected}" />
+                                        <EventSetter Event="Click" Handler="DefaultWorkItemServerItem_Clicked" />
                                     </Style>
                                 </MenuItem.ItemContainerStyle>
                             </MenuItem>
-                            <MenuItem Header="Default Source Control Server" IsCheckable="False" ItemsSource="{Binding RootConfiguration.SourceControlServersBinding}" IsEnabled="{Binding RootConfiguration.HasAnySourceControlServers}">
+                            <MenuItem
+                                Header="Default Source Control Server"
+                                IsCheckable="False"
+                                IsEnabled="{Binding RootConfiguration.HasAnySourceControlServers}"
+                                ItemsSource="{Binding RootConfiguration.SourceControlServersBinding}">
                                 <MenuItem.ItemContainerStyle>
                                     <Style TargetType="MenuItem">
-                                        <Setter Property="IsChecked" Value="{Binding IsSelected}"/>
-                                        <EventSetter Event="Click" Handler="DefaultSourceControlServerItem_Clicked"/>
+                                        <Setter Property="IsChecked" Value="{Binding IsSelected}" />
+                                        <EventSetter Event="Click" Handler="DefaultSourceControlServerItem_Clicked" />
                                     </Style>
                                 </MenuItem.ItemContainerStyle>
                             </MenuItem>
@@ -92,217 +103,439 @@
                     </Grid.Resources>
 
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <Button Grid.Column="0" Command="{Binding Commands.CreateMergeItemCommand}" Content="New Merge Item" Margin="5" Padding="5"/>
+                    <Button
+                        Grid.Column="0"
+                        Margin="5"
+                        Padding="5"
+                        Command="{Binding Commands.CreateMergeItemCommand}"
+                        Content="New Merge Item" />
 
-                    <Button Grid.Column="1" x:Name="ShowDefaultServersButton" Content="▼" Margin="5" Padding="5"
-                            Command="{Binding Commands.ShowDefaultServersMenuCommand}" CommandParameter="{Binding ElementName=ShowDefaultServersButton}"
-                            ContextMenu="{StaticResource DefaultServersContextMenu}"
-                            ToolTip="{Binding RootConfiguration.DefaultServersToolTip}">
-                    </Button>
+                    <Button
+                        x:Name="ShowDefaultServersButton"
+                        Grid.Column="1"
+                        Margin="5"
+                        Padding="5"
+                        Command="{Binding Commands.ShowDefaultServersMenuCommand}"
+                        CommandParameter="{Binding ElementName=ShowDefaultServersButton}"
+                        Content="▼"
+                        ContextMenu="{StaticResource DefaultServersContextMenu}"
+                        ToolTip="{Binding RootConfiguration.DefaultServersToolTip}" />
 
-                    <TextBlock Grid.Column="2" Text="Filter:" Margin="5" Padding="5"/>
-                    <TextBox x:Name="FilterTextBox" Grid.Column="3" Margin="5" Padding="5"
-                     Text="{Binding RootConfiguration.Filter, UpdateSourceTrigger=PropertyChanged, Delay=500}"/>
+                    <TextBlock
+                        Grid.Column="2"
+                        Margin="5"
+                        Padding="5"
+                        Text="Filter:" />
+                    <TextBox
+                        x:Name="FilterTextBox"
+                        Grid.Column="3"
+                        Margin="5"
+                        Padding="5"
+                        Text="{Binding RootConfiguration.Filter, UpdateSourceTrigger=PropertyChanged, Delay=500}" />
 
-                    <TextBlock Grid.Column="4" Text="Filter by not completed:" Margin="5" Padding="5"/>
-                    <CheckBox Grid.Column="5" IsChecked="{Binding RootConfiguration.NotCompletedFilter}" Margin="5" Padding="5" VerticalAlignment="Center"/>
+                    <TextBlock
+                        Grid.Column="4"
+                        Margin="5"
+                        Padding="5"
+                        Text="Filter by not completed:" />
+                    <CheckBox
+                        Grid.Column="5"
+                        Margin="5"
+                        Padding="5"
+                        VerticalAlignment="Center"
+                        IsChecked="{Binding RootConfiguration.NotCompletedFilter}" />
 
-                    <Button Grid.Column="6" Content="Reapply filters" Margin="5" Padding="5" VerticalAlignment="Center"
-                    Command="{Binding Commands.ReloadMergeItemsCommand}"/>
+                    <Button
+                        Grid.Column="6"
+                        Margin="5"
+                        Padding="5"
+                        VerticalAlignment="Center"
+                        Command="{Binding Commands.ReloadMergeItemsCommand}"
+                        Content="Reapply filters" />
 
-                    <Button Grid.Column="7" Content="Clear filters" Margin="5" Padding="5" VerticalAlignment="Center"
-                    Command="{Binding Commands.ClearFiltersCommand}"/>
+                    <Button
+                        Grid.Column="7"
+                        Margin="5"
+                        Padding="5"
+                        VerticalAlignment="Center"
+                        Command="{Binding Commands.ClearFiltersCommand}"
+                        Content="Clear filters" />
 
-                    <Button Grid.Column="8" Content="▼" ToolTip="Show/hide project settings" Margin="5" Padding="5" VerticalAlignment="Center"
-                    Command="{Binding Commands.ToggleProjectSettingsVisibilityCommand}"/>
+                    <Button
+                        Grid.Column="8"
+                        Margin="5"
+                        Padding="5"
+                        VerticalAlignment="Center"
+                        Command="{Binding Commands.ToggleProjectSettingsVisibilityCommand}"
+                        Content="▼"
+                        ToolTip="Show/hide project settings" />
                 </Grid>
 
-                <Grid Grid.Row="1" Height="40" Visibility="{c:Binding RootConfiguration.ShowProjectSettings, FalseToVisibility=Collapsed}">
+                <Grid
+                    Grid.Row="1"
+                    Height="40"
+                    Visibility="{c:Binding RootConfiguration.ShowProjectSettings,
+                                           FalseToVisibility=Collapsed}">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" Text="On-Prem TFS Username:" Margin="5" Padding="5"/>
-                    <TextBox Grid.Column="1" Text="{Binding RootConfiguration.OnPremTfsUsername}" ToolTip="{Binding RootConfiguration.OnPremTfsUsername}" Margin="5" Padding="5"/>
+                    <TextBlock
+                        Grid.Column="0"
+                        Margin="5"
+                        Padding="5"
+                        Text="On-Prem TFS Username:" />
+                    <TextBox
+                        Grid.Column="1"
+                        Margin="5"
+                        Padding="5"
+                        Text="{Binding RootConfiguration.OnPremTfsUsername}"
+                        ToolTip="{Binding RootConfiguration.OnPremTfsUsername}" />
 
-                    <TextBlock Grid.Column="2" Text="On-Prem TFS Password:" Margin="5" Padding="5"/>
-                    <PasswordBox Grid.Column="3" x:Name="OnPremTfsPasswordBox" PasswordChanged="OnPremTfsPasswordBox_PasswordChanged" Margin="5" Padding="5"/>
+                    <TextBlock
+                        Grid.Column="2"
+                        Margin="5"
+                        Padding="5"
+                        Text="On-Prem TFS Password:" />
+                    <PasswordBox
+                        x:Name="OnPremTfsPasswordBox"
+                        Grid.Column="3"
+                        Margin="5"
+                        Padding="5"
+                        PasswordChanged="OnPremTfsPasswordBox_PasswordChanged" />
                 </Grid>
 
-                <Grid Grid.Row="2" Height="40" Visibility="{c:Binding RootConfiguration.ShowProjectSettings, FalseToVisibility=Collapsed}">
+                <Grid
+                    Grid.Row="2"
+                    Height="40"
+                    Visibility="{c:Binding RootConfiguration.ShowProjectSettings,
+                                           FalseToVisibility=Collapsed}">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" Text="On-Prem TFS Work Item server(s):" Margin="5" Padding="5"/>
-                    <TextBox Grid.Column="1" Text="{Binding RootConfiguration.OnPremTfsWorkItemServers}" ToolTip="{Binding RootConfiguration.OnPremTfsWorkItemServers}" Margin="5" Padding="5"/>
+                    <TextBlock
+                        Grid.Column="0"
+                        Margin="5"
+                        Padding="5"
+                        Text="On-Prem TFS Work Item server(s):" />
+                    <TextBox
+                        Grid.Column="1"
+                        Margin="5"
+                        Padding="5"
+                        Text="{Binding RootConfiguration.OnPremTfsWorkItemServers}"
+                        ToolTip="{Binding RootConfiguration.OnPremTfsWorkItemServers}" />
                 </Grid>
 
-                <Grid Grid.Row="3" Height="40" Visibility="{c:Binding RootConfiguration.ShowProjectSettings, FalseToVisibility=Collapsed}">
+                <Grid
+                    Grid.Row="3"
+                    Height="40"
+                    Visibility="{c:Binding RootConfiguration.ShowProjectSettings,
+                                           FalseToVisibility=Collapsed}">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" Text="On-Prem TFS Source Control server(s):" Margin="5" Padding="5"/>
-                    <TextBox Grid.Column="1" Text="{Binding RootConfiguration.OnPremTfsSourceControlServers}" ToolTip="{Binding RootConfiguration.OnPremTfsSourceControlServers}" Margin="5" Padding="5"/>
+                    <TextBlock
+                        Grid.Column="0"
+                        Margin="5"
+                        Padding="5"
+                        Text="On-Prem TFS Source Control server(s):" />
+                    <TextBox
+                        Grid.Column="1"
+                        Margin="5"
+                        Padding="5"
+                        Text="{Binding RootConfiguration.OnPremTfsSourceControlServers}"
+                        ToolTip="{Binding RootConfiguration.OnPremTfsSourceControlServers}" />
                 </Grid>
 
-                <Grid Grid.Row="4" Height="40" Visibility="{c:Binding RootConfiguration.ShowProjectSettings, FalseToVisibility=Collapsed}">
+                <Grid
+                    Grid.Row="4"
+                    Height="40"
+                    Visibility="{c:Binding RootConfiguration.ShowProjectSettings,
+                                           FalseToVisibility=Collapsed}">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" Text="On-Prem TFS Git Source Control server(s):" Margin="5" Padding="5"/>
-                    <TextBox Grid.Column="1" Text="{Binding RootConfiguration.OnPremTfsGitSourceControlServers}" ToolTip="{Binding RootConfiguration.OnPremTfsGitSourceControlServers}" Margin="5" Padding="5"/>
+                    <TextBlock
+                        Grid.Column="0"
+                        Margin="5"
+                        Padding="5"
+                        Text="On-Prem TFS Git Source Control server(s):" />
+                    <TextBox
+                        Grid.Column="1"
+                        Margin="5"
+                        Padding="5"
+                        Text="{Binding RootConfiguration.OnPremTfsGitSourceControlServers}"
+                        ToolTip="{Binding RootConfiguration.OnPremTfsGitSourceControlServers}" />
                 </Grid>
 
-                <Grid Grid.Row="5" Height="40" Visibility="{c:Binding RootConfiguration.ShowProjectSettings, FalseToVisibility=Collapsed}">
+                <Grid
+                    Grid.Row="5"
+                    Height="40"
+                    Visibility="{c:Binding RootConfiguration.ShowProjectSettings,
+                                           FalseToVisibility=Collapsed}">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" Text="Cloud Azure DevOps Personal Access Token:" Margin="5" Padding="5"/>
-                    <TextBox Grid.Column="1" Text="{Binding RootConfiguration.CloudAzureDevOpsToken}" ToolTip="{Binding RootConfiguration.CloudAzureDevOpsToken}" Margin="5" Padding="5"/>
+                    <TextBlock
+                        Grid.Column="0"
+                        Margin="5"
+                        Padding="5"
+                        Text="Cloud Azure DevOps Personal Access Token:" />
+                    <TextBox
+                        Grid.Column="1"
+                        Margin="5"
+                        Padding="5"
+                        Text="{Binding RootConfiguration.CloudAzureDevOpsToken}"
+                        ToolTip="{Binding RootConfiguration.CloudAzureDevOpsToken}" />
                 </Grid>
 
-                <Grid Grid.Row="6" Height="40" Visibility="{c:Binding RootConfiguration.ShowProjectSettings, FalseToVisibility=Collapsed}">
+                <Grid
+                    Grid.Row="6"
+                    Height="40"
+                    Visibility="{c:Binding RootConfiguration.ShowProjectSettings,
+                                           FalseToVisibility=Collapsed}">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" Text="Cloud Azure DevOps Work Item server(s):" Margin="5" Padding="5"/>
-                    <TextBox Grid.Column="1" Text="{Binding RootConfiguration.CloudAzureDevOpsWorkItemServers}" ToolTip="{Binding RootConfiguration.CloudAzureDevOpsWorkItemServers}" Margin="5" Padding="5"/>
+                    <TextBlock
+                        Grid.Column="0"
+                        Margin="5"
+                        Padding="5"
+                        Text="Cloud Azure DevOps Work Item server(s):" />
+                    <TextBox
+                        Grid.Column="1"
+                        Margin="5"
+                        Padding="5"
+                        Text="{Binding RootConfiguration.CloudAzureDevOpsWorkItemServers}"
+                        ToolTip="{Binding RootConfiguration.CloudAzureDevOpsWorkItemServers}" />
                 </Grid>
 
-                <Grid Grid.Row="7" Height="40" Visibility="{c:Binding RootConfiguration.ShowProjectSettings, FalseToVisibility=Collapsed}">
+                <Grid
+                    Grid.Row="7"
+                    Height="40"
+                    Visibility="{c:Binding RootConfiguration.ShowProjectSettings,
+                                           FalseToVisibility=Collapsed}">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" Text="GitHub Personal Access Token:" Margin="5" Padding="5"/>
-                    <TextBox Grid.Column="1" Text="{Binding RootConfiguration.GitHubToken}" ToolTip="{Binding RootConfiguration.GitHubToken}" Margin="5" Padding="5"/>
+                    <TextBlock
+                        Grid.Column="0"
+                        Margin="5"
+                        Padding="5"
+                        Text="GitHub Personal Access Token:" />
+                    <TextBox
+                        Grid.Column="1"
+                        Margin="5"
+                        Padding="5"
+                        Text="{Binding RootConfiguration.GitHubToken}"
+                        ToolTip="{Binding RootConfiguration.GitHubToken}" />
                 </Grid>
 
-                <Grid Grid.Row="8" Height="40" Visibility="{c:Binding RootConfiguration.ShowProjectSettings, FalseToVisibility=Collapsed}">
+                <Grid
+                    Grid.Row="8"
+                    Height="40"
+                    Visibility="{c:Binding RootConfiguration.ShowProjectSettings,
+                                           FalseToVisibility=Collapsed}">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" Text="GitHub Work Item server(s):" Margin="5" Padding="5"/>
-                    <TextBox Grid.Column="1" Text="{Binding RootConfiguration.GitHubWorkItemServers}" ToolTip="{Binding RootConfiguration.GitHubWorkItemServers}" Margin="5" Padding="5"/>
+                    <TextBlock
+                        Grid.Column="0"
+                        Margin="5"
+                        Padding="5"
+                        Text="GitHub Work Item server(s):" />
+                    <TextBox
+                        Grid.Column="1"
+                        Margin="5"
+                        Padding="5"
+                        Text="{Binding RootConfiguration.GitHubWorkItemServers}"
+                        ToolTip="{Binding RootConfiguration.GitHubWorkItemServers}" />
                 </Grid>
 
-                <Grid Grid.Row="9" Height="40" Visibility="{c:Binding RootConfiguration.ShowProjectSettings, FalseToVisibility=Collapsed}">
+                <Grid
+                    Grid.Row="9"
+                    Height="40"
+                    Visibility="{c:Binding RootConfiguration.ShowProjectSettings,
+                                           FalseToVisibility=Collapsed}">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" Text="GitHub Source Control server(s):" Margin="5" Padding="5"/>
-                    <TextBox Grid.Column="1" Text="{Binding RootConfiguration.GitHubSourceControlServers}" ToolTip="{Binding RootConfiguration.GitHubSourceControlServers}" Margin="5" Padding="5"/>
+                    <TextBlock
+                        Grid.Column="0"
+                        Margin="5"
+                        Padding="5"
+                        Text="GitHub Source Control server(s):" />
+                    <TextBox
+                        Grid.Column="1"
+                        Margin="5"
+                        Padding="5"
+                        Text="{Binding RootConfiguration.GitHubSourceControlServers}"
+                        ToolTip="{Binding RootConfiguration.GitHubSourceControlServers}" />
                 </Grid>
 
-                <Grid Grid.Row="10" Height="40" Visibility="{c:Binding RootConfiguration.ShowProjectSettings, FalseToVisibility=Collapsed}">
+                <Grid
+                    Grid.Row="10"
+                    Height="40"
+                    Visibility="{c:Binding RootConfiguration.ShowProjectSettings,
+                                           FalseToVisibility=Collapsed}">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="2*" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" Text="Jira Username:" Margin="5" Padding="5"/>
-                    <TextBox Grid.Column="1" Text="{Binding RootConfiguration.JiraUsername}" ToolTip="{Binding RootConfiguration.JiraUsername}" Margin="5" Padding="5"/>
+                    <TextBlock
+                        Grid.Column="0"
+                        Margin="5"
+                        Padding="5"
+                        Text="Jira Username:" />
+                    <TextBox
+                        Grid.Column="1"
+                        Margin="5"
+                        Padding="5"
+                        Text="{Binding RootConfiguration.JiraUsername}"
+                        ToolTip="{Binding RootConfiguration.JiraUsername}" />
 
-                    <TextBlock Grid.Column="2" Text="Jira Password/Token:" Margin="5" Padding="5"/>
-                    <TextBox Grid.Column="3" Text="{Binding RootConfiguration.JiraPassword}" ToolTip="{Binding RootConfiguration.JiraPassword}" Margin="5" Padding="5"/>
+                    <TextBlock
+                        Grid.Column="2"
+                        Margin="5"
+                        Padding="5"
+                        Text="Jira Password/Token:" />
+                    <TextBox
+                        Grid.Column="3"
+                        Margin="5"
+                        Padding="5"
+                        Text="{Binding RootConfiguration.JiraPassword}"
+                        ToolTip="{Binding RootConfiguration.JiraPassword}" />
                 </Grid>
 
-                <Grid Grid.Row="11" Height="40" Visibility="{c:Binding RootConfiguration.ShowProjectSettings, FalseToVisibility=Collapsed}">
+                <Grid
+                    Grid.Row="11"
+                    Height="40"
+                    Visibility="{c:Binding RootConfiguration.ShowProjectSettings,
+                                           FalseToVisibility=Collapsed}">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" Text="Jira Work Item server(s):" Margin="5" Padding="5"/>
-                    <TextBox Grid.Column="1" Text="{Binding RootConfiguration.JiraWorkItemServers}" ToolTip="{Binding RootConfiguration.JiraWorkItemServers}" Margin="5" Padding="5"/>
+                    <TextBlock
+                        Grid.Column="0"
+                        Margin="5"
+                        Padding="5"
+                        Text="Jira Work Item server(s):" />
+                    <TextBox
+                        Grid.Column="1"
+                        Margin="5"
+                        Padding="5"
+                        Text="{Binding RootConfiguration.JiraWorkItemServers}"
+                        ToolTip="{Binding RootConfiguration.JiraWorkItemServers}" />
                 </Grid>
 
-                <Grid Grid.Row="12" Height="40" Visibility="{c:Binding RootConfiguration.ShowProjectSettings, FalseToVisibility=Collapsed}">
+                <Grid
+                    Grid.Row="12"
+                    Height="40"
+                    Visibility="{c:Binding RootConfiguration.ShowProjectSettings,
+                                           FalseToVisibility=Collapsed}">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" Text="Check-in message:" Margin="5" Padding="5"/>
-                    <TextBox Grid.Column="1" Text="{Binding RootConfiguration.CheckInMessage, UpdateSourceTrigger=PropertyChanged}" Margin="5" Padding="5" ToolTipService.ShowDuration="60000">
+                    <TextBlock
+                        Grid.Column="0"
+                        Margin="5"
+                        Padding="5"
+                        Text="Check-in message:" />
+                    <TextBox
+                        Grid.Column="1"
+                        Margin="5"
+                        Padding="5"
+                        Text="{Binding RootConfiguration.CheckInMessage, UpdateSourceTrigger=PropertyChanged}"
+                        ToolTipService.ShowDuration="60000">
                         <TextBox.ToolTip>
                             <TextBlock>
-                                <Run Text="This message will be copied to the clipboard when 'Generate Check-in Message' is clicked."/>
-                                <LineBreak/>
-                                <LineBreak/>
-                                <Run Text="%o = original bug number"/>
-                                <LineBreak/>
-                                <Run Text="%v = original branch"/>
-                                <LineBreak/>
-                                <Run Text="%t = target bug number"/>
-                                <LineBreak/>
-                                <Run Text="%b = target branch"/>
-                                <LineBreak/>
-                                <LineBreak/>
-                                <Run Text="Sample: "/>
-                                <Run Text="{Binding RootConfiguration.SampleCheckInMessage, Mode=OneWay}"/>
+                                <Run Text="This message will be copied to the clipboard when 'Generate Check-in Message' is clicked." />
+                                <LineBreak />
+                                <LineBreak />
+                                <Run Text="%o = original bug number" />
+                                <LineBreak />
+                                <Run Text="%v = original branch" />
+                                <LineBreak />
+                                <Run Text="%t = target bug number" />
+                                <LineBreak />
+                                <Run Text="%b = target branch" />
+                                <LineBreak />
+                                <LineBreak />
+                                <Run Text="Sample: " />
+                                <Run Text="{Binding RootConfiguration.SampleCheckInMessage, Mode=OneWay}" />
                             </TextBlock>
                         </TextBox.ToolTip>
                     </TextBox>
                 </Grid>
 
-                <ItemsControl Grid.Row="13" Margin="0,5,0,0" ItemsSource="{Binding RootConfiguration.MergeItems}" IsTabStop="False"
-                      VirtualizingPanel.ScrollUnit="Pixel">
+                <ItemsControl
+                    Grid.Row="13"
+                    Margin="0,5,0,0"
+                    IsTabStop="False"
+                    ItemsSource="{Binding RootConfiguration.MergeItems}"
+                    VirtualizingPanel.ScrollUnit="Pixel">
                     <!--
-                The ItemsPanel and Template come from https://stackoverflow.com/a/2784220/4206279 
-                Using a VirtualizingStackPanel causes by-item scrolling, hence the need for ScrollUnit="Pixel" property.
-                Together, these changes allow fairly smooth scrolling with MUCH faster load times due to virtualization
-            -->
+                        The ItemsPanel and Template come from https://stackoverflow.com/a/2784220/4206279
+                        Using a VirtualizingStackPanel causes by-item scrolling, hence the need for ScrollUnit="Pixel" property.
+                        Together, these changes allow fairly smooth scrolling with MUCH faster load times due to virtualization
+                    -->
 
-                    <!-- The Panel control that holds the items should support virtualization -->
+                    <!--  The Panel control that holds the items should support virtualization  -->
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <VirtualizingStackPanel IsVirtualizing="True"
-                                            VirtualizationMode="Recycling"/>
+                            <VirtualizingStackPanel IsVirtualizing="True" VirtualizationMode="Recycling" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
 
-                    <!-- The template should be a ScrollViewer -->
+                    <!--  The template should be a ScrollViewer  -->
                     <ItemsControl.Template>
                         <ControlTemplate TargetType="ItemsControl">
-                            <Border BorderThickness="{TemplateBinding BorderThickness}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            Background="{TemplateBinding Background}">
-                                <ScrollViewer CanContentScroll="True" 
-                                      Padding="{TemplateBinding Padding}"
-                                      Focusable="False">
+                            <Border
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                                <ScrollViewer
+                                    Padding="{TemplateBinding Padding}"
+                                    CanContentScroll="True"
+                                    Focusable="False">
                                     <ItemsPresenter />
                                 </ScrollViewer>
                             </Border>
@@ -314,19 +547,27 @@
                             <local:MergeItemGrid>
                                 <local:MergeItemGrid.Resources>
                                     <ContextMenu x:Key="MergeTargetContextMenu" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
-                                        <MenuItem Header="Work Item Server" IsCheckable="False" ItemsSource="{Binding WorkItemServers}" IsEnabled="{c:Binding 'WorkItemServer != null'}">
+                                        <MenuItem
+                                            Header="Work Item Server"
+                                            IsCheckable="False"
+                                            IsEnabled="{c:Binding 'WorkItemServer != null'}"
+                                            ItemsSource="{Binding WorkItemServers}">
                                             <MenuItem.ItemContainerStyle>
                                                 <Style TargetType="MenuItem">
-                                                    <Setter Property="IsChecked" Value="{Binding IsSelected}"/>
-                                                    <Setter Property="Command" Value="{Binding Command}"/>
+                                                    <Setter Property="IsChecked" Value="{Binding IsSelected}" />
+                                                    <Setter Property="Command" Value="{Binding Command}" />
                                                 </Style>
                                             </MenuItem.ItemContainerStyle>
                                         </MenuItem>
-                                        <MenuItem Header="Source Control Server" IsCheckable="False" ItemsSource="{Binding SourceControlServers}" IsEnabled="{c:Binding 'SourceControlServer != null'}">
+                                        <MenuItem
+                                            Header="Source Control Server"
+                                            IsCheckable="False"
+                                            IsEnabled="{c:Binding 'SourceControlServer != null'}"
+                                            ItemsSource="{Binding SourceControlServers}">
                                             <MenuItem.ItemContainerStyle>
                                                 <Style TargetType="MenuItem">
-                                                    <Setter Property="IsChecked" Value="{Binding IsSelected}"/>
-                                                    <Setter Property="Command" Value="{Binding Command}"/>
+                                                    <Setter Property="IsChecked" Value="{Binding IsSelected}" />
+                                                    <Setter Property="Command" Value="{Binding Command}" />
                                                 </Style>
                                             </MenuItem.ItemContainerStyle>
                                         </MenuItem>
@@ -337,49 +578,94 @@
                                 </local:MergeItemGrid.Resources>
 
                                 <local:MergeItemGrid.ColumnDefinitions>
-                                    <ColumnDefinition Width="2*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
                                 </local:MergeItemGrid.ColumnDefinitions>
 
                                 <local:MergeItemGrid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition/>
-                                    <RowDefinition Height="20"/>
-                                    <RowDefinition Height="15"/>
-                                    <RowDefinition Height="20"/>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition />
+                                    <RowDefinition Height="20" />
+                                    <RowDefinition Height="15" />
+                                    <RowDefinition Height="20" />
                                 </local:MergeItemGrid.RowDefinitions>
 
-                                <xctk:RichTextBox Grid.Column="0" Grid.Row="0" Margin="5" Padding="5" ToolTip="{Binding Name}"
-                                              Text="{Binding Name, UpdateSourceTrigger=PropertyChanged,
-                                              Converter={StaticResource HighlightedTextConverter}, ConverterParameter=Name}"
-                                              LostFocus="RichTextBox_LostFocus">
+                                <xctk:RichTextBox
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    Margin="5"
+                                    Padding="5"
+                                    LostFocus="RichTextBox_LostFocus"
+                                    Text="{Binding Name, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource HighlightedTextConverter}, ConverterParameter=Name}"
+                                    ToolTip="{Binding Name}">
                                     <xctk:RichTextBox.TextFormatter>
                                         <xctk:XamlFormatter />
                                     </xctk:RichTextBox.TextFormatter>
                                 </xctk:RichTextBox>
 
-                                <Button Grid.Column="1" Grid.Row="0" Margin="5" Padding="5" Content="◀"
-                                        ToolTip="Populate work item name" Command="{Binding Commands.PopulateWorkItemNameCommand}" CommandParameter="{Binding ElementName=DataGrid}"/>
+                                <Button
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    Margin="5"
+                                    Padding="5"
+                                    Command="{Binding Commands.PopulateWorkItemNameCommand}"
+                                    CommandParameter="{Binding ElementName=DataGrid}"
+                                    Content="◀"
+                                    ToolTip="Populate work item name" />
 
-                                <TextBlock Grid.Column="2" Grid.Row="0" Margin="5" Padding="5" Text="!!" FontSize="15"
-                                        ToolTip="{Binding LastError}" Visibility="{c:Binding HasLastError, FalseToVisibility=Collapsed}"/>
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="2"
+                                    Margin="5"
+                                    Padding="5"
+                                    FontSize="15"
+                                    Text="!!"
+                                    ToolTip="{Binding LastError}"
+                                    Visibility="{c:Binding HasLastError,
+                                                           FalseToVisibility=Collapsed}" />
 
-                                <Button Grid.Column="4" Grid.Row="0" Margin="5" Padding="5,0,5,0" Content="New Merge Target"
-                                        Command="{Binding Commands.CreateMergeTargetCommand}"/>
+                                <Label
+                                    Grid.Row="0"
+                                    Grid.Column="3"
+                                    VerticalAlignment="Center"
+                                    Content="{Binding LocalCreatedDateTimeTime, StringFormat=g}" />
 
-                                <Button Grid.Column="5" Grid.Row="0" Margin="5" Padding="5,0,5,0" Content="Delete"
-                                    Command="{Binding Commands.DeleteCommand}"/>
+                                <Button
+                                    Grid.Row="0"
+                                    Grid.Column="4"
+                                    Margin="5"
+                                    Padding="5,0,5,0"
+                                    Command="{Binding Commands.CreateMergeTargetCommand}"
+                                    Content="New Merge Target" />
 
-                                <local:MyDataGrid x:Name="DataGrid" Grid.Column="0" Grid.ColumnSpan="6" Grid.Row="1" Margin="5" ItemsSource="{Binding MergeTargets}" AutoGenerateColumns="False"
-                                        GridLinesVisibility="None" HeadersVisibility="Column" BorderThickness="0" CanUserAddRows="False"
-                                        RowStyle="{StaticResource MergeTargetRowStyle}"
-                                        PreviewKeyDown="DataGrid_PreviewKeyDown">
+                                <Button
+                                    Grid.Row="0"
+                                    Grid.Column="5"
+                                    Margin="5"
+                                    Padding="5,0,5,0"
+                                    Command="{Binding Commands.DeleteCommand}"
+                                    Content="Delete" />
+
+                                <local:MyDataGrid
+                                    x:Name="DataGrid"
+                                    Grid.Row="1"
+                                    Grid.Column="0"
+                                    Grid.ColumnSpan="6"
+                                    Margin="5"
+                                    AutoGenerateColumns="False"
+                                    BorderThickness="0"
+                                    CanUserAddRows="False"
+                                    GridLinesVisibility="None"
+                                    HeadersVisibility="Column"
+                                    ItemsSource="{Binding MergeTargets}"
+                                    PreviewKeyDown="DataGrid_PreviewKeyDown"
+                                    RowStyle="{StaticResource MergeTargetRowStyle}">
                                     <i:Interaction.Behaviors>
-                                        <local:IgnoreMouseWheelBehavior/>
+                                        <local:IgnoreMouseWheelBehavior />
                                     </i:Interaction.Behaviors>
 
                                     <DataGrid.Resources>
@@ -389,22 +675,31 @@
                                         </Style>
 
                                         <Style TargetType="{x:Type DataGridCell}">
-                                            <Setter Property="IsTabStop" Value="False"/>
+                                            <Setter Property="IsTabStop" Value="False" />
                                             <Style.Triggers>
                                                 <Trigger Property="IsSelected" Value="True">
                                                     <Setter Property="Background" Value="{x:Null}" />
                                                     <Setter Property="BorderBrush" Value="{x:Null}" />
                                                 </Trigger>
 
-                                                <DataTrigger Binding="{Binding IsCompleted}" Value="True" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
+                                                <DataTrigger
+                                                    d:DataContext="{d:DesignInstance Type=local:MergeTarget}"
+                                                    Binding="{Binding IsCompleted}"
+                                                    Value="True">
                                                     <Setter Property="Background" Value="LightGreen" />
                                                     <Setter Property="BorderBrush" Value="LightGreen" />
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding IsCompleted}" Value="{x:Null}" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
+                                                <DataTrigger
+                                                    d:DataContext="{d:DesignInstance Type=local:MergeTarget}"
+                                                    Binding="{Binding IsCompleted}"
+                                                    Value="{x:Null}">
                                                     <Setter Property="Background" Value="LemonChiffon" />
                                                     <Setter Property="BorderBrush" Value="LemonChiffon" />
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding IsCompleted}" Value="False" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
+                                                <DataTrigger
+                                                    d:DataContext="{d:DesignInstance Type=local:MergeTarget}"
+                                                    Binding="{Binding IsCompleted}"
+                                                    Value="False">
                                                     <Setter Property="Background" Value="Pink" />
                                                     <Setter Property="BorderBrush" Value="Pink" />
                                                 </DataTrigger>
@@ -415,62 +710,100 @@
 
                                     <DataGrid.Columns>
 
-                                        <DataGridTemplateColumn Header="Completed" Width="Auto" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
+                                        <DataGridTemplateColumn
+                                            Width="Auto"
+                                            d:DataContext="{d:DesignInstance Type=local:MergeTarget}"
+                                            Header="Completed">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <CheckBox IsChecked="{Binding IsCompleted, UpdateSourceTrigger=PropertyChanged}" Margin="5" Height="20" HorizontalAlignment="Center"
-                                                          IsThreeState="True"/>
+                                                    <CheckBox
+                                                        Height="20"
+                                                        Margin="5"
+                                                        HorizontalAlignment="Center"
+                                                        IsChecked="{Binding IsCompleted, UpdateSourceTrigger=PropertyChanged}"
+                                                        IsThreeState="True" />
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
 
-                                        <DataGridTemplateColumn Header="Original" Width="Auto" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
+                                        <DataGridTemplateColumn
+                                            Width="Auto"
+                                            d:DataContext="{d:DesignInstance Type=local:MergeTarget}"
+                                            Header="Original">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <RadioButton IsChecked="{Binding IsOriginal, UpdateSourceTrigger=PropertyChanged}" Margin="5" Height="20" HorizontalAlignment="Center"/>
+                                                    <RadioButton
+                                                        Height="20"
+                                                        Margin="5"
+                                                        HorizontalAlignment="Center"
+                                                        IsChecked="{Binding IsOriginal, UpdateSourceTrigger=PropertyChanged}" />
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
 
-                                        <DataGridTemplateColumn Header="Work Item Number" Width="*" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
+                                        <DataGridTemplateColumn
+                                            Width="*"
+                                            d:DataContext="{d:DesignInstance Type=local:MergeTarget}"
+                                            Header="Work Item Number">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <Grid>
                                                         <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="Auto"/>
-                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="Auto" />
                                                         </Grid.ColumnDefinitions>
 
-                                                        <xctk:RichTextBox Grid.Column="0" Margin="5,0,0,0" Height="20" ToolTip="{Binding WorkItemId}"
-                                                                      Text="{Binding WorkItemId, UpdateSourceTrigger=PropertyChanged,
-                                                                      Converter={StaticResource HighlightedTextConverter}, ConverterParameter=WorkItemId}"
-                                                                      AcceptsReturn="False" LostFocus="RichTextBox_LostFocus"
-                                                                      Tag="WorkItemId">
+                                                        <xctk:RichTextBox
+                                                            Grid.Column="0"
+                                                            Height="20"
+                                                            Margin="5,0,0,0"
+                                                            AcceptsReturn="False"
+                                                            LostFocus="RichTextBox_LostFocus"
+                                                            Tag="WorkItemId"
+                                                            Text="{Binding WorkItemId, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource HighlightedTextConverter}, ConverterParameter=WorkItemId}"
+                                                            ToolTip="{Binding WorkItemId}">
                                                             <xctk:RichTextBox.TextFormatter>
                                                                 <xctk:XamlFormatter />
                                                             </xctk:RichTextBox.TextFormatter>
                                                         </xctk:RichTextBox>
-                                                        <Button Grid.Column="1" Width="20" Height="20" HorizontalAlignment="Right" Content="❐"
+                                                        <Button
+                                                            Grid.Column="1"
+                                                            Width="20"
+                                                            Height="20"
+                                                            HorizontalAlignment="Right"
                                                             Command="{Binding DataContext.Commands.CopyWorkItemIdCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                             CommandParameter="{Binding ElementName=DataGrid}"
-                                                            ToolTip="Copy work item number to clipboard"/>
-                                                        <Button Grid.Column="2" Width="20" Margin="0,0,5,0" Height="20" HorizontalAlignment="Right" Content="◥"
+                                                            Content="❐"
+                                                            ToolTip="Copy work item number to clipboard" />
+                                                        <Button
+                                                            Grid.Column="2"
+                                                            Width="20"
+                                                            Height="20"
+                                                            Margin="0,0,5,0"
+                                                            HorizontalAlignment="Right"
                                                             Command="{Binding DataContext.Commands.OpenWorkItemCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                             CommandParameter="{Binding ElementName=DataGrid}"
-                                                            ToolTip="Open work item in web (Ctrl-Enter)"/>
+                                                            Content="◥"
+                                                            ToolTip="Open work item in web (Ctrl-Enter)" />
                                                     </Grid>
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
 
-                                        <DataGridTemplateColumn Header="Target Branch" Width="*" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
+                                        <DataGridTemplateColumn
+                                            Width="*"
+                                            d:DataContext="{d:DesignInstance Type=local:MergeTarget}"
+                                            Header="Target Branch">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <xctk:RichTextBox Margin="5,0,5,0" Height="20" ToolTip="{Binding TargetBranch}"
-                                                                  Text="{Binding TargetBranch, UpdateSourceTrigger=PropertyChanged,
-                                                                  Converter={StaticResource HighlightedTextConverter}, ConverterParameter=TargetBranch}"
-                                                                  AcceptsReturn="False" LostFocus="RichTextBox_LostFocus">
+                                                    <xctk:RichTextBox
+                                                        Height="20"
+                                                        Margin="5,0,5,0"
+                                                        AcceptsReturn="False"
+                                                        LostFocus="RichTextBox_LostFocus"
+                                                        Text="{Binding TargetBranch, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource HighlightedTextConverter}, ConverterParameter=TargetBranch}"
+                                                        ToolTip="{Binding TargetBranch}">
                                                         <xctk:RichTextBox.TextFormatter>
                                                             <xctk:XamlFormatter />
                                                         </xctk:RichTextBox.TextFormatter>
@@ -479,76 +812,112 @@
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
 
-                                        <DataGridTemplateColumn Header="Changeset(s)" Width="*" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
+                                        <DataGridTemplateColumn
+                                            Width="*"
+                                            d:DataContext="{d:DesignInstance Type=local:MergeTarget}"
+                                            Header="Changeset(s)">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <Grid>
                                                         <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="Auto"/>
-                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="Auto" />
                                                         </Grid.ColumnDefinitions>
 
-                                                        <xctk:RichTextBox Grid.Column="0" Margin="5,0,0,0" Height="20" ToolTip="{Binding ChangesetId}"
-                                                                      Text="{Binding ChangesetId, UpdateSourceTrigger=PropertyChanged,
-                                                                      Converter={StaticResource HighlightedTextConverter}, ConverterParameter=ChangesetId}"
-                                                                      AcceptsReturn="False" LostFocus="RichTextBox_LostFocus"
-                                                                      Tag="ChangesetId">
+                                                        <xctk:RichTextBox
+                                                            Grid.Column="0"
+                                                            Height="20"
+                                                            Margin="5,0,0,0"
+                                                            AcceptsReturn="False"
+                                                            LostFocus="RichTextBox_LostFocus"
+                                                            Tag="ChangesetId"
+                                                            Text="{Binding ChangesetId, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource HighlightedTextConverter}, ConverterParameter=ChangesetId}"
+                                                            ToolTip="{Binding ChangesetId}">
                                                             <xctk:RichTextBox.TextFormatter>
                                                                 <xctk:XamlFormatter />
                                                             </xctk:RichTextBox.TextFormatter>
                                                         </xctk:RichTextBox>
-                                                        <Button Grid.Column="1" Width="20" Height="20" HorizontalAlignment="Right" Content="❐"
-                                                                Command="{Binding DataContext.Commands.CopyChangesetCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                                CommandParameter="{Binding ElementName=DataGrid}"
-                                                                ToolTip="Copy changeset(s) to clipboard"/>
-                                                        <Button Grid.Column="2" Width="20" Margin="0,0,5,0" Height="20" HorizontalAlignment="Right" Content="◥"
+                                                        <Button
+                                                            Grid.Column="1"
+                                                            Width="20"
+                                                            Height="20"
+                                                            HorizontalAlignment="Right"
+                                                            Command="{Binding DataContext.Commands.CopyChangesetCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                            CommandParameter="{Binding ElementName=DataGrid}"
+                                                            Content="❐"
+                                                            ToolTip="Copy changeset(s) to clipboard" />
+                                                        <Button
+                                                            Grid.Column="2"
+                                                            Width="20"
+                                                            Height="20"
+                                                            Margin="0,0,5,0"
+                                                            HorizontalAlignment="Right"
                                                             Command="{Binding DataContext.Commands.OpenChangesetCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                             CommandParameter="{Binding ElementName=DataGrid}"
-                                                            ToolTip="Open changeset(s) in web (Ctrl-Enter)"/>
+                                                            Content="◥"
+                                                            ToolTip="Open changeset(s) in web (Ctrl-Enter)" />
                                                     </Grid>
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
 
-                                        <DataGridTemplateColumn Header="Notes" Width="*" d:DataContext="{d:DesignInstance Type=local:MergeTarget}">
+                                        <DataGridTemplateColumn
+                                            Width="*"
+                                            d:DataContext="{d:DesignInstance Type=local:MergeTarget}"
+                                            Header="Notes">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <TextBox Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" Margin="5"
-                                                         TextWrapping="Wrap" AcceptsReturn="True"
-                                                         ToolTip="{Binding Notes}"/>
+                                                    <TextBox
+                                                        Margin="5"
+                                                        AcceptsReturn="True"
+                                                        Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
+                                                        TextWrapping="Wrap"
+                                                        ToolTip="{Binding Notes}" />
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
 
-                                        <DataGridTemplateColumn Header="Generate Check-in Message" Width="Auto">
+                                        <DataGridTemplateColumn Width="Auto" Header="Generate Check-in Message">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <Button Content="Generate Check-in Message" Margin="5,0,5,0" Height="20" Padding="5,0,5,0"
+                                                    <Button
+                                                        Height="20"
+                                                        Margin="5,0,5,0"
+                                                        Padding="5,0,5,0"
                                                         Command="{Binding DataContext.Commands.GenerateMessageCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                         CommandParameter="{Binding ElementName=DataGrid}"
-                                                        ToolTip="Generates a check-in message containing the original work item number and branch info and the target branch.&#x0a;Copies the message to the clipboard."/>
+                                                        Content="Generate Check-in Message"
+                                                        ToolTip="Generates a check-in message containing the original work item number and branch info and the target branch.&#x0a;Copies the message to the clipboard." />
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
 
-                                        <DataGridTemplateColumn Header="Delete" Width="Auto">
+                                        <DataGridTemplateColumn Width="Auto" Header="Delete">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <Button Content="Delete" Margin="5,0,5,0" Height="20" Padding="5,0,5,0"
+                                                    <Button
+                                                        Height="20"
+                                                        Margin="5,0,5,0"
+                                                        Padding="5,0,5,0"
                                                         Command="{Binding DataContext.Commands.DeleteMergeTargetCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                        CommandParameter="{Binding ElementName=DataGrid}"/>
+                                                        CommandParameter="{Binding ElementName=DataGrid}"
+                                                        Content="Delete" />
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
 
-                                        <DataGridTemplateColumn Header="Menu" Width="Auto">
+                                        <DataGridTemplateColumn Width="Auto" Header="Menu">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <Button Content="▼" Margin="5,0,5,0" Height="20" Padding="5,0,5,0"
+                                                    <Button
+                                                        Height="20"
+                                                        Margin="5,0,5,0"
+                                                        Padding="5,0,5,0"
                                                         Command="{Binding DataContext.Commands.ShowMergeTargetContextMenuCommand, RelativeSource={RelativeSource AncestorType=local:MainWindow}}"
                                                         CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}}"
-                                                        ToolTip="{Binding ServersToolTip}"/>
+                                                        Content="▼"
+                                                        ToolTip="{Binding ServersToolTip}" />
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
@@ -556,13 +925,24 @@
                                     </DataGrid.Columns>
                                 </local:MyDataGrid>
 
-                                <Canvas Grid.Column="0" Grid.ColumnSpan="5" Grid.Row="3" Background="LightGray" Margin="5"/>
+                                <Canvas
+                                    Grid.Row="3"
+                                    Grid.Column="0"
+                                    Grid.ColumnSpan="5"
+                                    Margin="5"
+                                    Background="LightGray" />
                             </local:MergeItemGrid>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
-                <GridSplitter Grid.Row="13" VerticalAlignment="Top" HorizontalAlignment="Stretch" Background="DarkGray" Height="5" IsEnabled="False" />
+                <GridSplitter
+                    Grid.Row="13"
+                    Height="5"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Top"
+                    Background="DarkGray"
+                    IsEnabled="False" />
             </Grid>
         </DockPanel>
     </xctk:BusyIndicator>

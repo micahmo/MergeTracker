@@ -93,6 +93,20 @@ namespace MergeTracker
         }
         private string _name;
 
+        public DateTimeOffset? CreatedDateTimeTime
+        {
+            get => _createdDateTimeTime;
+            set
+            {
+                Set(nameof(CreatedDateTimeTime), ref _createdDateTimeTime, value);
+                RaisePropertyChanged(nameof(LocalCreatedDateTimeTime));
+            }
+        }
+        private DateTimeOffset? _createdDateTimeTime;
+
+        [BsonIgnore]
+        public DateTime? LocalCreatedDateTimeTime => CreatedDateTimeTime?.ToLocalTime().DateTime;
+
         [BsonIgnore]
         public MergeItemCommands Commands { get; }
 
