@@ -928,7 +928,7 @@
                                 <Canvas
                                     Grid.Row="3"
                                     Grid.Column="0"
-                                    Grid.ColumnSpan="5"
+                                    Grid.ColumnSpan="6"
                                     Margin="5"
                                     Background="LightGray" />
                             </local:MergeItemGrid>
