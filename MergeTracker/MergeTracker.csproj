@@ -6,8 +6,8 @@
     <UseWPF>true</UseWPF>
     <LangVersion>8</LangVersion>
     <ApplicationIcon>icon.ico</ApplicationIcon>
-    <AssemblyVersion>2.0.4.0</AssemblyVersion>
-    <FileVersion>2.0.4.0</FileVersion>
+    <AssemblyVersion>2.0.5.0</AssemblyVersion>
+    <FileVersion>2.0.5.0</FileVersion>
     <Authors>Micah Morrison</Authors>
   </PropertyGroup>
 
