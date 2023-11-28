@@ -24,6 +24,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Extended.Wpf.Toolkit" Version="3.8.2" />
+    <PackageReference Include="Flurl.Http" Version="3.2.4" />
     <PackageReference Include="HtmlToXamlConverter" Version="1.0.5727.24510" />
     <PackageReference Include="Jot" Version="2.1.13" />
     <PackageReference Include="LinqKit.Core" Version="1.1.21" />
